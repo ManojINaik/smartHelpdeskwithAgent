@@ -10,6 +10,7 @@ try {
   // ws not available in test env; noop stubs
   WebSocketServer = class { constructor() {} on() {} };
   WebSocketType = class {};
+  console.warn('Notifications: ws module not available; WebSocket server disabled (test environment?)');
 }
 
 type UserId = string;
@@ -21,15 +22,18 @@ class NotificationHub {
 
   init(server: Server) {
     this.wss = new WebSocketServer({ server, path: '/ws' });
+    console.log('🔔 WebSocket server initialized at /ws');
     this.wss.on('connection', (socket: any, req: any) => {
       const url = new URL(req.url || '', `http://${req.headers.host}`);
       const userId = url.searchParams.get('userId') || 'anon';
       const set = this.userSockets.get(userId) || new Set<any>();
       set.add(socket);
       this.userSockets.set(userId, set);
+      console.log(`🔔 WS connected: userId=${userId} sockets=${set.size}`);
       socket.on('close', () => {
         set.delete(socket);
         if (set.size === 0) this.userSockets.delete(userId);
+        console.log(`🔕 WS disconnected: userId=${userId} remaining=${set.size}`);
       });
     });
   }

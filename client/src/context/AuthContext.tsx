@@ -35,13 +35,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       try {
         const resp = await api.get('/api/auth/me');
-        setUser(resp.data.user);
-        wsClient.connect(resp.data.user.id ?? resp.data.user.sub);
+        const userData = resp.data.user;
+        setUser(userData);
+        
+        // Connect WebSocket with proper userId
+        const userId = userData.id ?? userData.sub;
+        if (userId && userId !== 'undefined') {
+          wsClient.connect(userId);
+        }
       } catch {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         setUser(null);
         setToken(null);
+        wsClient.disconnect();
       } finally {
         setLoading(false);
       }
@@ -74,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('refreshToken');
       setUser(null);
       setToken(null);
+      wsClient.disconnect();
     }
   }), [user, token, loading]);
 

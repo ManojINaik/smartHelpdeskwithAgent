@@ -82,8 +82,8 @@ const agentSuggestionSchema = new Schema<IAgentSuggestion>({
   toObject: { virtuals: true }
 });
 
-// Indexes for optimal query performance
-agentSuggestionSchema.index({ ticketId: 1 }, { unique: true });
+// Indexes for optimal query performance (avoid duplicates with field-level unique)
+// ticketId already has unique: true at field level
 agentSuggestionSchema.index({ predictedCategory: 1 });
 agentSuggestionSchema.index({ confidence: -1 });
 agentSuggestionSchema.index({ autoClosed: 1 });

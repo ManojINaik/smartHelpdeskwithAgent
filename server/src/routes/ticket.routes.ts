@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { authenticate, authorize } from '../middleware/auth.js';
 import TicketService from '../services/ticket.service.js';
 import WorkflowOrchestrator from '../services/agent/workflow.js';
+import AuditLogService from '../services/audit.service.js';
 
 const router = Router();
 
@@ -65,6 +66,20 @@ router.post('/:id/assign', authenticate, authorize(['admin', 'agent']), async (r
     res.json({ ticket });
   } catch (err: any) {
     res.status(400).json({ error: { code: 'TICKET_ASSIGN_FAILED', message: err.message } });
+  }
+});
+
+// Update ticket status (admin/agent)
+const statusSchema = z.object({ status: z.enum(['open','triaged','waiting_human','resolved','closed']) });
+router.put('/:id/status', authenticate, authorize(['admin','agent']), async (req, res): Promise<void> => {
+  try {
+    const { status } = statusSchema.parse(req.body);
+    const ticket = await TicketService.updateStatus(req.params.id as string, status);
+    if (!ticket) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Ticket not found' } }); return; }
+    await AuditLogService.log(String(ticket._id), req.traceId || 'n/a', 'agent', 'STATUS_CHANGED', { by: req.user!.sub, status });
+    res.json({ ticket });
+  } catch (err: any) {
+    res.status(400).json({ error: { code: 'TICKET_STATUS_UPDATE_FAILED', message: err.message } });
   }
 });
 

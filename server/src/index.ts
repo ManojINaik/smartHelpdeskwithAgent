@@ -104,17 +104,24 @@ app.use('*', (req, res) => {
 // Error handler
 app.use(errorHandler);
 
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Smart Helpdesk API server running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  // Establish database connection on startup
-  dbConnection.connect().catch((err) => {
-    console.error('Failed to connect to database on startup:', err);
-    process.exit(1);
-  });
-});
+async function bootstrap() {
+  try {
+    // Ensure database is connected before accepting requests
+    await dbConnection.connect();
 
-// Initialize WebSocket notifications
-import Notifications from './services/notify.service.js';
-Notifications.init(server);
+    const server = app.listen(PORT, () => {
+      console.log(`🚀 Smart Helpdesk API server running on port ${PORT}`);
+      console.log(`📊 Health check: http://localhost:${PORT}/health`);
+      console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+
+    // Initialize WebSocket notifications after server starts
+    const { default: Notifications } = await import('./services/notify.service.js');
+    Notifications.init(server);
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+}
+
+bootstrap();

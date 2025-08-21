@@ -4,18 +4,30 @@ import AdminLayout from '../components/AdminLayout';
 
 export const AdminMetrics: React.FC = () => {
   const [data, setData] = useState<any>(null);
-  useEffect(() => { (async () => {
-    const res = await api.get('/api/admin/metrics');
-    setData(res.data);
-  })(); }, []);
+  
+  useEffect(() => { 
+    (async () => {
+      const res = await api.get('/api/admin/metrics');
+      setData(res.data);
+    })(); 
+  }, []);
 
-  if (!data) return <AdminLayout title="System Metrics"><div className="p-2 text-gray-600">Loading...</div></AdminLayout>;
+  const cards = useMemo(() => {
+    if (!data) return [];
+    return [
+      { title: 'Tickets by Status', content: data.tickets },
+      { title: 'Suggestion Performance', content: data.suggestions },
+      { title: 'Users by Role', content: data.users }
+    ];
+  }, [data]);
 
-  const cards = useMemo(() => ([
-    { title: 'Tickets by Status', content: data.tickets },
-    { title: 'Suggestion Performance', content: data.suggestions },
-    { title: 'Users by Role', content: data.users }
-  ]), [data]);
+  if (!data) {
+    return (
+      <AdminLayout title="System Metrics">
+        <div className="p-2 text-gray-600">Loading...</div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout title="System Metrics">

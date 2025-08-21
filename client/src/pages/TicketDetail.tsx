@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../lib/api';
 import TicketStatus from '../components/TicketStatus';
+import { useAuth } from '../context/AuthContext';
 
 export const TicketDetail: React.FC = () => {
   const { id } = useParams();
@@ -9,6 +10,9 @@ export const TicketDetail: React.FC = () => {
   const [audit, setAudit] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reply, setReply] = useState('');
+  const { user } = useAuth();
+  const isPrivileged = user?.role === 'admin' || user?.role === 'agent';
+  const [newStatus, setNewStatus] = useState<string>('');
 
   useEffect(() => {
     async function load() {
@@ -29,6 +33,13 @@ export const TicketDetail: React.FC = () => {
     if (!reply.trim()) return;
     await api.post(`/api/tickets/${id}/reply`, { content: reply });
     setReply('');
+    const t = await api.get(`/api/tickets/${id}`);
+    setTicket(t.data.ticket);
+  };
+
+  const updateStatus = async () => {
+    if (!newStatus || newStatus === ticket.status) return;
+    await api.put(`/api/tickets/${id}/status`, { status: newStatus });
     const t = await api.get(`/api/tickets/${id}`);
     setTicket(t.data.ticket);
   };
@@ -66,6 +77,20 @@ export const TicketDetail: React.FC = () => {
           <button className="rounded bg-blue-600 px-3 py-2 text-white" onClick={sendReply}>Send</button>
         </div>
       </div>
+
+      {isPrivileged && (
+        <div className="mb-6 rounded border p-3">
+          <h3 className="mb-2 font-medium">Change Status</h3>
+          <div className="flex items-center gap-2">
+            <select className="rounded border px-2 py-1" value={newStatus || ticket.status} onChange={e => setNewStatus(e.target.value)}>
+              {['open','triaged','waiting_human','resolved','closed'].map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <button className="rounded bg-indigo-600 px-3 py-2 text-white" onClick={updateStatus}>Update</button>
+          </div>
+        </div>
+      )}
 
       <div>
         <h3 className="mb-2 font-medium">Audit Timeline</h3>

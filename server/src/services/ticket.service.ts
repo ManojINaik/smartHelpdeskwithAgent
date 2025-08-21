@@ -82,6 +82,14 @@ export class TicketService {
     await (ticket as any).assignTo(assigneeId);
     return ticket;
   }
+
+  static async updateStatus(id: string, status: TicketStatus) {
+    const ticket: any = await Ticket.findById(id);
+    if (!ticket) return null;
+    ticket.status = status;
+    await ticket.save();
+    return ticket;
+  }
 }
 
 export default TicketService;

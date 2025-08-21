@@ -53,9 +53,8 @@ const auditLogSchema = new Schema<IAuditLog>({
   strict: true
 });
 
-// Indexes for optimal query performance
+// Indexes for optimal query performance (avoid duplicate traceId index)
 auditLogSchema.index({ ticketId: 1, timestamp: -1 });
-auditLogSchema.index({ traceId: 1 });
 auditLogSchema.index({ actor: 1 });
 auditLogSchema.index({ action: 1 });
 auditLogSchema.index({ timestamp: -1 });
