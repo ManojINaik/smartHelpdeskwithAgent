@@ -12,8 +12,7 @@ import {
   Settings, 
   User,
   Shield,
-  LogOut,
-  Search
+  LogOut
 } from 'lucide-react';
 
 const NavLink: React.FC<{ to: string; children: React.ReactNode }> = ({ to, children }) => {
@@ -92,17 +91,7 @@ export const AdminLayout: React.FC<{ title?: string; children: React.ReactNode }
           </div>
           
           <div className="flex items-center gap-3">
-            {/* Search */}
-            <div className="hidden md:flex relative">
-              <div className="w-64 h-11 bg-white/20 rounded-3xl flex items-center px-4">
-                <Search className="h-4 w-4 text-white/70 mr-3 flex-shrink-0" />
-                <input 
-                  type="text" 
-                  placeholder="Search admin..."
-                  className="bg-transparent text-sm font-mulish font-medium text-white placeholder:text-white/70 flex-1 outline-none"
-                />
-              </div>
-            </div>
+
             
             {/* Notifications */}
             <NotificationBell className="w-11 h-11" />

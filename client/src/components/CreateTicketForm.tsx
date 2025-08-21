@@ -80,17 +80,8 @@ export const CreateTicketForm: React.FC = () => {
       )}
 
       {/* Modern Payment-Inspired Form Card */}
-      <ModernCard variant="payment">
-        <div className="mb-6">
-          <h3 className="text-2xl font-mulish font-bold text-neutral-900 mb-2">
-            Create New Ticket
-          </h3>
-          <p className="text-sm font-mulish font-medium text-neutral-400">
-            Describe your issue and we'll help you resolve it
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Title Field */}
           <div className="space-y-2">
             <Label 
@@ -209,11 +200,11 @@ export const CreateTicketForm: React.FC = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-between pt-4">
+          <div className="flex justify-between pt-3">
             <Button 
               type="button" 
               variant="secondary"
-              size="lg"
+              size="default"
               onClick={() => {
                 reset();
                 setCategory('other');
@@ -228,9 +219,9 @@ export const CreateTicketForm: React.FC = () => {
             
             <Button 
               type="submit" 
-              size="lg"
+              size="default"
               disabled={isSubmitting}
-              className="font-mulish font-bold min-w-[140px]"
+              className="font-mulish font-bold min-w-[120px] bg-primary-500 hover:bg-primary-600"
             >
               {isSubmitting ? (
                 <>
@@ -243,7 +234,7 @@ export const CreateTicketForm: React.FC = () => {
             </Button>
           </div>
         </form>
-      </ModernCard>
+      </div>
     </div>
   );
 };

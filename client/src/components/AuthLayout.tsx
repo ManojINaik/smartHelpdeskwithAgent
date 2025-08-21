@@ -12,8 +12,7 @@ import {
   LogOut,
   Settings,
   BarChart3,
-  Bell,
-  Search
+  Bell
 } from 'lucide-react';
 
 export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -39,17 +38,7 @@ export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }
               </div>
             </Link>
             
-            {/* Search Bar */}
-            <div className="hidden md:flex relative">
-              <div className="w-64 h-10 bg-white/20 rounded-3xl flex items-center px-4">
-                <Search className="h-4 w-4 text-white/70 mr-3" />
-                <input 
-                  type="text" 
-                  placeholder="Search tickets..."
-                  className="bg-transparent text-sm font-mulish font-medium text-white placeholder:text-white/70 flex-1 outline-none"
-                />
-              </div>
-            </div>
+
           </div>
           
           <div className="flex items-center gap-4">

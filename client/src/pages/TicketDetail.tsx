@@ -125,6 +125,55 @@ export const TicketDetail: React.FC = () => {
     });
   };
 
+  const getAuditMessage = (log: any) => {
+    switch (log.action) {
+      case 'TICKET_CREATED':
+        return 'Ticket was created';
+      case 'TRIAGE_PLANNED':
+        return 'AI triage was planned';
+      case 'AGENT_CLASSIFIED':
+        return `AI classified as ${log.meta?.predictedCategory || 'unknown'} category`;
+      case 'KB_RETRIEVED':
+        return 'Knowledge base was searched';
+      case 'DRAFT_GENERATED':
+        return 'AI generated a draft response';
+      case 'ASSIGNED_TO_HUMAN':
+        return 'Assigned to human agent';
+      case 'AUTO_CLOSED':
+        return 'Automatically resolved by AI';
+      case 'STATUS_CHANGED':
+        return `Status changed to ${log.meta?.newStatus || 'unknown'}`;
+      case 'REPLY_ADDED':
+        return 'New reply was added';
+      case 'TICKET_ASSIGNED':
+        return `Ticket assigned to ${log.meta?.assigneeName || 'agent'}`;
+      default:
+        return log.action.replace('_', ' ').toLowerCase();
+    }
+  };
+
+  const getAuditIcon = (action: string) => {
+    switch (action) {
+      case 'TICKET_CREATED':
+        return <MessageSquare className="h-4 w-4 text-blue-600" />;
+      case 'TRIAGE_PLANNED':
+      case 'AGENT_CLASSIFIED':
+      case 'KB_RETRIEVED':
+      case 'DRAFT_GENERATED':
+        return <Eye className="h-4 w-4 text-purple-600" />;
+      case 'ASSIGNED_TO_HUMAN':
+      case 'TICKET_ASSIGNED':
+        return <User className="h-4 w-4 text-green-600" />;
+      case 'AUTO_CLOSED':
+      case 'STATUS_CHANGED':
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'REPLY_ADDED':
+        return <MessageSquare className="h-4 w-4 text-blue-600" />;
+      default:
+        return <Clock className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
   const getLayoutComponent = () => {
     if (user?.role === 'admin') return AdminLayout;
     if (user?.role === 'agent') return AgentNavbar;
@@ -355,7 +404,7 @@ export const TicketDetail: React.FC = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <History className="h-5 w-5" />
-                  Audit Timeline
+                  Activity Timeline
                   <Badge variant="secondary" className="ml-auto">
                     {audit.length} events
                   </Badge>
@@ -371,24 +420,22 @@ export const TicketDetail: React.FC = () => {
                         )}
                         <div className="flex gap-3">
                           <div className="flex-shrink-0">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                              <Clock className="h-4 w-4 text-blue-600" />
+                            <div className="w-8 h-8 rounded-full bg-gray-50 border-2 border-white shadow-sm flex items-center justify-center">
+                              {getAuditIcon(log.action)}
                             </div>
                           </div>
                           <div className="flex-1 min-w-0 pb-4">
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-sm font-medium text-gray-900">
-                                {log.action.replace('_', ' ').toUpperCase()}
+                                {getAuditMessage(log)}
                               </span>
                               <span className="text-xs text-gray-500">
                                 {formatDate(log.timestamp)}
                               </span>
                             </div>
-                            {log.meta && Object.keys(log.meta).length > 0 && (
-                              <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                                <pre className="whitespace-pre-wrap text-gray-600">
-                                  {JSON.stringify(log.meta, null, 2)}
-                                </pre>
+                            {log.meta?.confidence && (
+                              <div className="text-xs text-gray-500">
+                                Confidence: {Math.round(log.meta.confidence * 100)}%
                               </div>
                             )}
                           </div>
@@ -398,7 +445,7 @@ export const TicketDetail: React.FC = () => {
                   ) : (
                     <div className="text-center py-4 text-gray-500">
                       <History className="h-6 w-6 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm">No audit logs available</p>
+                      <p className="text-sm">No activity logs available</p>
                     </div>
                   )}
                 </div>

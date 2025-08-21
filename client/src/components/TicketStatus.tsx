@@ -20,15 +20,30 @@ export const TicketStatus: React.FC<{ status: TStatus }> = ({ status }) => {
     }
   };
   
-  const label = status.replace('_', ' ');
+  const getStatusLabel = (status: TStatus) => {
+    switch (status) {
+      case 'waiting_human':
+        return 'Waiting Human';
+      case 'open':
+        return 'Open';
+      case 'triaged':
+        return 'Triaged';
+      case 'resolved':
+        return 'Resolved';
+      case 'closed':
+        return 'Closed';
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+  };
   
   return (
     <Badge 
       variant={getStatusVariant(status) as any} 
       size="sm"
-      className="capitalize font-mulish font-bold"
+      className="capitalize font-mulish font-bold whitespace-nowrap"
     >
-      {label}
+      {getStatusLabel(status)}
     </Badge>
   );
 };

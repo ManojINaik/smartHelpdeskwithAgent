@@ -8,7 +8,6 @@ import { NotificationBell } from './NotificationCenter';
 import { 
   BookOpen, 
   Edit3, 
-  Search, 
   Plus,
   User,
   Settings,
@@ -64,7 +63,7 @@ export const KBLayout: React.FC<{ title?: string; children: React.ReactNode }> =
             <nav className="hidden lg:flex items-center gap-2">
               <NavLink to="/kb">
                 <div className="flex items-center gap-2">
-                  <Search className="h-4 w-4" />
+                  <BookOpen className="h-4 w-4" />
                   Browse
                 </div>
               </NavLink>
@@ -108,17 +107,7 @@ export const KBLayout: React.FC<{ title?: string; children: React.ReactNode }> =
           </div>
           
           <div className="flex items-center gap-4">
-            {/* Search */}
-            <div className="hidden md:flex relative">
-              <div className="w-64 h-10 bg-white/20 rounded-3xl flex items-center px-4">
-                <Search className="h-4 w-4 text-white/70 mr-3" />
-                <input 
-                  type="text" 
-                  placeholder="Search articles..."
-                  className="bg-transparent text-sm font-mulish font-medium text-white placeholder:text-white/70 flex-1 outline-none"
-                />
-              </div>
-            </div>
+
             
             {/* New Article Button for Admins */}
             {pathname === '/kb' && user?.role === 'admin' && (

@@ -44,13 +44,13 @@ export const TicketList: React.FC = () => {
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Modern Filter Controls */}
-      <ModernCard variant="profile">
-        <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+      <ModernCard variant="profile" className="shadow-soft">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
           <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-primary-500" />
-            <span className="font-mulish font-bold text-lg text-neutral-900">
+            <Filter className="w-4 h-4 text-primary-500" />
+            <span className="font-mulish font-bold text-base text-neutral-900">
               Tickets
             </span>
             <Badge variant="accent" size="sm">
@@ -58,12 +58,12 @@ export const TicketList: React.FC = () => {
             </Badge>
           </div>
           
-          <div className="flex flex-wrap items-center gap-4 flex-1">
+          <div className="flex flex-wrap items-center gap-3 flex-1">
             {showFilterOptions && (
               <div className="flex items-center gap-2">
                 <Label variant="modern" size="sm">Filter</Label>
                 <Select value={filter || 'all'} onValueChange={(value) => setFilter(value as any)}>
-                  <SelectTrigger className="w-40 h-10 rounded-2xl font-mulish font-semibold">
+                  <SelectTrigger className="w-36 h-9 rounded-2xl font-mulish font-semibold">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -79,7 +79,7 @@ export const TicketList: React.FC = () => {
             <div className="flex items-center gap-2">
               <Label variant="modern" size="sm">Status</Label>
               <Select value={status || 'all'} onValueChange={(value) => setStatus(value === 'all' ? undefined : value as any)}>
-                <SelectTrigger className="w-36 h-10 rounded-2xl font-mulish font-semibold">
+                <SelectTrigger className="w-32 h-9 rounded-2xl font-mulish font-semibold">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
@@ -96,7 +96,7 @@ export const TicketList: React.FC = () => {
             <div className="flex items-center gap-2">
               <SortAsc className="w-4 h-4 text-neutral-400" />
               <Select value={sort} onValueChange={(value) => setSort(value as any)}>
-                <SelectTrigger className="w-32 h-10 rounded-2xl font-mulish font-semibold">
+                <SelectTrigger className="w-28 h-9 rounded-2xl font-mulish font-semibold">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -131,22 +131,22 @@ export const TicketList: React.FC = () => {
 
       {/* Tickets List */}
       {!loading && !error && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {sorted.map(t => (
-            <ModernCard key={t._id} variant="profile" className="hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
-              <div className="space-y-4">
+            <ModernCard key={t._id} variant="profile" className="hover:shadow-xl transition-all duration-200 hover:-translate-y-1 shadow-soft">
+              <div className="space-y-3">
                 {/* Ticket Header */}
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <Link 
                       to={`/tickets/${t._id}`} 
-                      className="font-mulish font-bold text-lg text-primary-800 hover:text-primary-600 transition-colors line-clamp-2"
+                      className="font-mulish font-bold text-base text-primary-800 hover:text-primary-600 transition-colors line-clamp-2"
                     >
                       {t.title}
                     </Link>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Calendar className="w-4 h-4 text-neutral-400" />
-                      <span className="text-sm font-mulish font-medium text-neutral-400">
+                    <div className="flex items-center gap-2 mt-1">
+                      <Calendar className="w-3 h-3 text-neutral-400" />
+                      <span className="text-xs font-mulish font-medium text-neutral-400">
                         {new Date(t.createdAt).toLocaleDateString()}
                       </span>
                     </div>
@@ -155,32 +155,25 @@ export const TicketList: React.FC = () => {
                 </div>
                 
                 {/* Ticket Description */}
-                <p className="text-sm font-mulish font-medium text-neutral-600 line-clamp-3">
+                <p className="text-sm font-mulish font-medium text-neutral-600 line-clamp-2">
                   {t.description}
                 </p>
                 
                 {/* Ticket Meta Info */}
                 <div className="flex items-center justify-between pt-2 border-t border-neutral-200">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
-                      <MessageSquare className="w-4 h-4 text-neutral-400" />
+                      <MessageSquare className="w-3 h-3 text-neutral-400" />
                       <span className="text-xs font-mulish font-semibold text-neutral-400">
                         {t.category || 'General'}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <User className="w-4 h-4 text-neutral-400" />
+                      <User className="w-3 h-3 text-neutral-400" />
                       <span className="text-xs font-mulish font-semibold text-neutral-400">
                         Unassigned
                       </span>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-1">
-                    <Clock className={`w-4 h-4 ${getStatusColor(t.status)}`} />
-                    <span className={`text-xs font-mulish font-bold capitalize ${getStatusColor(t.status)}`}>
-                      {t.status.replace('_', ' ')}
-                    </span>
                   </div>
                 </div>
               </div>
