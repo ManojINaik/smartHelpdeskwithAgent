@@ -1,0 +1,31 @@
+# Simple HTTP requests for manual load testing (use REST Client or similar)
+
+### Register user
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "User",
+  "email": "user-{{$timestamp}}@example.com",
+  "password": "Password123!"
+}
+
+### Login user
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "Password123!"
+}
+
+### Create ticket
+POST http://localhost:3000/api/tickets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "App shows 500 on login",
+  "description": "Stack trace mentions auth module"
+}
+
