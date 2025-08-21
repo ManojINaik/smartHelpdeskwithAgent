@@ -91,6 +91,11 @@ body {
   padding: 24px;
 }
 
+/* Modern dropdown shadow */
+.shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
 /* Modern form components */
 .modern-input {
   width: 100%;

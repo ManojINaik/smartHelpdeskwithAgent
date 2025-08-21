@@ -129,19 +129,17 @@ export const CreateTicketForm: React.FC = () => {
               <Label variant="modern" className="text-neutral-400">
                 Category
               </Label>
-              <div className="h-15 rounded-lg border-2 border-neutral-200 bg-background flex items-center px-5">
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="border-0 p-0 h-auto font-mulish font-bold text-primary-800">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="other">General</SelectItem>
-                    <SelectItem value="billing">Billing</SelectItem>
-                    <SelectItem value="tech">Technical</SelectItem>
-                    <SelectItem value="shipping">Shipping</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="h-15 rounded-lg border-2 border-neutral-200 bg-background font-mulish font-bold text-primary-800">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="other">General</SelectItem>
+                  <SelectItem value="billing">Billing</SelectItem>
+                  <SelectItem value="tech">Technical</SelectItem>
+                  <SelectItem value="shipping">Shipping</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="flex-1 space-y-2">

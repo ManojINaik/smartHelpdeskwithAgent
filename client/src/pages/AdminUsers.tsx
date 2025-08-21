@@ -215,7 +215,7 @@ export const AdminUsers: React.FC = () => {
                           onValueChange={(value: 'admin'|'agent'|'user') => setRole(user._id, value)}
                           disabled={updating === user._id}
                         >
-                          <SelectTrigger className="w-32">
+                          <SelectTrigger className="w-40 h-10 font-mulish font-semibold">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
