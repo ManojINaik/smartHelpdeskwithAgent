@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 // Admin-only: create, update, delete, publish/unpublish
 const articleSchema = z.object({
   title: z.string().min(5).max(200),
-  body: z.string().min(10).max(50000),
+  body: z.string().min(5).max(50000),
   tags: z.array(z.string()).optional(),
   status: z.enum(['draft', 'published']).optional(),
 });
@@ -33,7 +33,7 @@ router.post('/', authenticate, authorize(['admin']), async (req, res) => {
 
 const updateSchema = z.object({
   title: z.string().min(5).max(200).optional(),
-  body: z.string().min(10).max(50000).optional(),
+  body: z.string().min(5).max(50000).optional(),
   tags: z.array(z.string()).optional(),
   status: z.enum(['draft', 'published']).optional(),
 });

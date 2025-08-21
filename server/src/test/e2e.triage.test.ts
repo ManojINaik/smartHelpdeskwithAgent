@@ -2,21 +2,15 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import app from './server.mock.js';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('E2E - Triage workflow', () => {
-  let mongoServer: MongoMemoryServer;
   let userToken: string;
   let agentToken: string;
   let ticketId: string;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create({ binary: { version: '7.0.14' } });
-    const uri = mongoServer.getUri();
-    process.env.MONGODB_URI = uri;
     process.env.LLM_PROVIDER = 'stub';
     process.env.STUB_MODE = 'true';
-    await mongoose.connect(uri);
 
     const userEmail = `user${Date.now()}@example.com`;
     const agentEmail = `agent${Date.now()}@example.com`;
@@ -28,9 +22,7 @@ describe('E2E - Triage workflow', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
+    // Global teardown handled in setup.ts
   });
 
   it('creates a ticket, triggers triage, and persists suggestion', async () => {

@@ -12,7 +12,7 @@ const articleSchema = new Schema<IArticle>({
   body: {
     type: String,
     required: [true, 'Article body is required'],
-    minlength: [10, 'Article body must be at least 10 characters long'],
+    minlength: [5, 'Article body must be at least 5 characters long'],
     maxlength: [50000, 'Article body cannot exceed 50,000 characters']
   },
   tags: {

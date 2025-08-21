@@ -2,19 +2,13 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import app from '../test/server.mock.js';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('KB API', () => {
-  let mongoServer: MongoMemoryServer;
   let adminToken: string;
   let userToken: string;
   let articleId: string;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create({ binary: { version: '7.0.14' } });
-    const uri = mongoServer.getUri();
-    process.env.MONGODB_URI = uri;
-    await mongoose.connect(uri);
 
     const adminEmail = `admin${Date.now()}@example.com`;
     const userEmail = `user${Date.now()}@example.com`;
@@ -31,9 +25,7 @@ describe('KB API', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
+    // Global teardown handled in setup.ts
   });
 
   it('admin can create article', async () => {

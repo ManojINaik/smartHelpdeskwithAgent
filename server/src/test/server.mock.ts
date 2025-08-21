@@ -9,6 +9,8 @@ import ticketRoutes from '../routes/ticket.routes.js';
 import agentRoutes from '../routes/agent.routes.js';
 import auditRoutes from '../routes/audit.routes.js';
 import configRoutes from '../routes/config.routes.js';
+// Avoid importing ws in tests
+vi.mock('../services/notify.service.js', () => ({ __esModule: true, default: { init: () => {}, broadcastToUser: () => {} } }));
 import { authenticate, authorize } from '../middleware/auth.js';
 
 dotenv.config({ path: '.env.test' });

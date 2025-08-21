@@ -2,22 +2,15 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import app from '../test/server.mock.js';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('Auth API', () => {
-  let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create({ binary: { version: '7.0.14' } });
-    const uri = mongoServer.getUri();
-    process.env.MONGODB_URI = uri;
-    await mongoose.connect(uri, { serverSelectionTimeoutMS: 60000 });
+    // Global MongoDB is started in setup.ts
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
+    // Global teardown handled in setup.ts
   });
   let email = `user${Date.now()}@example.com`;
   const password = 'Password123!';

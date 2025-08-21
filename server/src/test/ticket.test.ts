@@ -2,19 +2,13 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import app from '../test/server.mock.js';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('Ticket API', () => {
-  let mongoServer: MongoMemoryServer;
   let userToken: string;
   let agentToken: string;
   let ticketId: string;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create({ binary: { version: '7.0.14' } });
-    const uri = mongoServer.getUri();
-    process.env.MONGODB_URI = uri;
-    await mongoose.connect(uri);
 
     const userEmail = `user${Date.now()}@example.com`;
     const agentEmail = `agent${Date.now()}@example.com`;
@@ -31,9 +25,7 @@ describe('Ticket API', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
+    // Global teardown handled in setup.ts
   });
 
   it('user can create a ticket with attachments', async () => {
@@ -61,10 +53,11 @@ describe('Ticket API', () => {
   });
 
   it('agent can assign a ticket', async () => {
+    const agentPayload = JSON.parse(Buffer.from(agentToken.split('.')[1], 'base64').toString());
     const res = await request(app)
       .post(`/api/tickets/${ticketId}/assign`)
       .set('Authorization', `Bearer ${agentToken}`)
-      .send({ assigneeId: JSON.parse(Buffer.from(agentToken.split('.')[1], 'base64').toString()).sub });
+      .send({ assigneeId: agentPayload.id || agentPayload.sub });
     expect(res.status).toBe(200);
     expect(res.body.ticket.assignee).toBeTruthy();
   });

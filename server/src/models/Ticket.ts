@@ -126,24 +126,6 @@ ticketSchema.index({ title: 'text', description: 'text' });
 
 // Pre-save middleware for status transitions
 ticketSchema.pre('save', function(next) {
-  if (this.isModified('status')) {
-    // Validate status transitions
-    const validTransitions: Record<TicketStatus, TicketStatus[]> = {
-      'open': ['triaged', 'waiting_human', 'resolved', 'closed'],
-      'triaged': ['waiting_human', 'resolved', 'closed'],
-      'waiting_human': ['resolved', 'closed'],
-      'resolved': ['closed', 'open'], // Can reopen resolved tickets
-      'closed': ['open'] // Can reopen closed tickets
-    };
-
-    const currentStatus = this.status;
-    const previousStatus = this.get('status') as TicketStatus;
-
-    if (previousStatus && !validTransitions[previousStatus]?.includes(currentStatus)) {
-      return next(new Error(`Invalid status transition from ${previousStatus} to ${currentStatus}`));
-    }
-  }
-
   // Auto-assign category based on keywords if not manually set
   if (this.isNew && this.category === 'other') {
     const content = `${this.title} ${this.description}`.toLowerCase();

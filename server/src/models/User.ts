@@ -20,7 +20,7 @@ const userSchema = new Schema<IUser>({
   password_hash: {
     type: String,
     required: [true, 'Password hash is required'],
-    minlength: [60, 'Invalid password hash format'] // bcrypt hash length
+    // Do not validate hash length here; pre-save hook will hash plaintext
   },
   role: {
     type: String,

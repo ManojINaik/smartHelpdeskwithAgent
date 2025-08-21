@@ -2,21 +2,15 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import app from '../test/server.mock.js';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import Ticket from '../models/Ticket.js';
 
 describe('Agent Suggestion Decision', () => {
-  let mongoServer: MongoMemoryServer;
   let agentToken: string;
   let ticketId: string;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create({ binary: { version: '7.0.14' } });
-    const uri = mongoServer.getUri();
-    process.env.MONGODB_URI = uri;
     process.env.LLM_PROVIDER = 'stub';
     process.env.STUB_MODE = 'true';
-    await mongoose.connect(uri);
 
     const agentEmail = `agent${Date.now()}@example.com`;
     const agentReg = await request(app)
@@ -35,9 +29,7 @@ describe('Agent Suggestion Decision', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
+    // Global teardown handled in setup.ts
   });
 
   it('can triage and get suggestion', async () => {

@@ -20,7 +20,7 @@ export const KBEditor: React.FC = () => {
         setId(res.data.article._id);
         setMessage('Article created');
       } else {
-        const res = await api.put(`/api/kb/${id}`, payload);
+        await api.put(`/api/kb/${id}`, payload);
         setMessage('Article updated');
       }
     } catch (e: any) {
