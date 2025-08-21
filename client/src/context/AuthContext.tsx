@@ -36,10 +36,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const resp = await api.get('/api/auth/me');
         const userData = resp.data.user;
-        setUser(userData);
-        
+        const normalized = {
+          id: userData.id ?? userData._id ?? userData.sub,
+          name: userData.name ?? userData.username ?? userData.email,
+          email: userData.email,
+          role: userData.role,
+        } as any;
+        setUser(normalized);
+
         // Connect WebSocket with proper userId
-        const userId = userData.id ?? userData.sub;
+        const userId = normalized.id;
         if (userId && userId !== 'undefined') {
           wsClient.connect(userId);
         }
@@ -65,16 +71,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('accessToken', resp.data.accessToken);
       localStorage.setItem('refreshToken', resp.data.refreshToken);
       setToken(resp.data.accessToken);
-      setUser(resp.data.user);
-      return resp.data.user as User;
+      const u = resp.data.user;
+      const normalized = {
+        id: u.id ?? u._id ?? u.sub,
+        name: u.name ?? u.username ?? u.email,
+        email: u.email,
+        role: u.role,
+      } as any;
+      setUser(normalized);
+      return normalized as User;
     },
     async register(name, email, password) {
       const resp = await api.post('/api/auth/register', { name, email, password });
       localStorage.setItem('accessToken', resp.data.accessToken);
       localStorage.setItem('refreshToken', resp.data.refreshToken);
       setToken(resp.data.accessToken);
-      setUser(resp.data.user);
-      return resp.data.user as User;
+      const u = resp.data.user;
+      const normalized = {
+        id: u.id ?? u._id ?? u.sub,
+        name: u.name ?? u.username ?? u.email,
+        email: u.email,
+        role: u.role,
+      } as any;
+      setUser(normalized);
+      return normalized as User;
     },
     logout() {
       localStorage.removeItem('accessToken');

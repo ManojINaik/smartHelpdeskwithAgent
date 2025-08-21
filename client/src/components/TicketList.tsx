@@ -4,19 +4,34 @@ import { useTickets } from '../hooks/useTickets';
 import { Link } from 'react-router-dom';
 
 export const TicketList: React.FC = () => {
-  const { items, loading, error, page, setPage, total, status, setStatus } = useTickets();
+  const { items, loading, error, page, setPage, total, status, setStatus, filter, setFilter, userRole } = useTickets();
   const [sort, setSort] = useState<'newest' | 'oldest' | 'status'>('newest');
   const totalPages = Math.max(1, Math.ceil(total / 10));
+  
   const sorted = useMemo(() => {
     const c = [...items];
     if (sort === 'newest') return c.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
     if (sort === 'oldest') return c.sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt));
     return c.sort((a, b) => a.status.localeCompare(b.status));
   }, [items, sort]);
+  
+  const showFilterOptions = userRole === 'admin' || userRole === 'agent';
+  
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 justify-between">
         <div className="flex items-center gap-3">
+          {showFilterOptions && (
+            <>
+              <label className="form-label">Filter</label>
+              <select className="form-select" value={filter} onChange={e => setFilter(e.target.value as any)}>
+                {userRole === 'admin' && <option value="all">All Tickets</option>}
+                <option value="my">My Tickets</option>
+                <option value="assigned">Assigned to Me</option>
+                <option value="unassigned">Unassigned</option>
+              </select>
+            </>
+          )}
           <label className="form-label">Status</label>
           <select className="form-select" value={status || ''} onChange={e => setStatus(e.target.value as any || undefined)}>
             <option value="">All</option>

@@ -12,6 +12,20 @@ router.get('/', async (req, res) => {
   res.json({ results });
 });
 
+// Get individual article (public or authenticated user)
+router.get('/:id', async (req, res) => {
+  try {
+    const article = await KnowledgeBaseService.getArticle(req.params.id as string);
+    if (!article) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Article not found' } });
+      return;
+    }
+    res.json({ article });
+  } catch (err: any) {
+    res.status(400).json({ error: { code: 'KB_GET_FAILED', message: err.message } });
+  }
+});
+
 // Admin-only: create, update, delete, publish/unpublish
 const articleSchema = z.object({
   title: z.string().min(5).max(200),

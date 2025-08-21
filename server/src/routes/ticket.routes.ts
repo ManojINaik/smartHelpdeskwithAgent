@@ -31,9 +31,17 @@ router.post('/', authenticate, async (req, res) => {
 router.get('/', authenticate, async (req, res) => {
   const status = req.query.status as any;
   const myTickets = String(req.query.my || '').toLowerCase() === 'true';
+  const assignedToMe = String(req.query.assignedToMe || '').toLowerCase() === 'true';
+  const unassigned = String(req.query.unassigned || '').toLowerCase() === 'true';
   const page = Number(req.query.page || 1);
   const pageSize = Number(req.query.pageSize || 20);
-  const result = await TicketService.listTickets(req.user!.sub, { status, myTickets }, page, pageSize);
+  const result = await TicketService.listTickets(
+    req.user!.sub,
+    req.user!.role,
+    { status, myTickets, assignedToMe, unassigned },
+    page,
+    pageSize
+  );
   res.json(result);
 });
 

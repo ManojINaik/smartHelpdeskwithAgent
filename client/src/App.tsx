@@ -9,6 +9,7 @@ import HomePage from './pages/Home';
 import TicketDetail from './pages/TicketDetail';
 import KBList from './pages/KBList';
 import KBEditor from './pages/KBEditor';
+import KBArticle from './pages/KBArticle';
 import AgentDashboard from './pages/AgentDashboard';
 import SuggestionReview from './pages/SuggestionReview';
 import NotificationCenter from './components/NotificationCenter';
@@ -27,8 +28,10 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
         <Route path="/tickets/:id" element={<ProtectedRoute><TicketDetail /></ProtectedRoute>} />
-        <Route path="/kb" element={<ProtectedRoute roles={['admin','agent']}><KBList /></ProtectedRoute>} />
+        <Route path="/kb" element={<ProtectedRoute><KBList /></ProtectedRoute>} />
         <Route path="/kb/editor" element={<ProtectedRoute roles={['admin']}><KBEditor /></ProtectedRoute>} />
+        <Route path="/kb/editor/:id" element={<ProtectedRoute roles={['admin']}><KBEditor /></ProtectedRoute>} />
+        <Route path="/kb/article/:id" element={<ProtectedRoute><KBArticle /></ProtectedRoute>} />
         <Route path="/agent" element={<ProtectedRoute roles={['admin','agent']}><AgentDashboard /></ProtectedRoute>} />
         <Route path="/agent/suggestion/:ticketId" element={<ProtectedRoute roles={['admin','agent']}><SuggestionReview /></ProtectedRoute>} />
         <Route path="/admin/config" element={<ProtectedRoute roles={['admin']}><AdminConfig /></ProtectedRoute>} />

@@ -15,6 +15,7 @@ export interface TicketFilters {
   myTickets?: boolean;
   assignedToMe?: boolean;
   unassigned?: boolean;
+  userRole?: 'admin' | 'agent' | 'user';
 }
 
 export class TicketService {
@@ -46,19 +47,41 @@ export class TicketService {
     return ticket;
   }
 
-  static async listTickets(userId: string, filters: TicketFilters, page = 1, pageSize = 20) {
+  static async listTickets(userId: string, userRole: string, filters: TicketFilters, page = 1, pageSize = 20) {
     const query: any = {};
     if (filters.status) query.status = filters.status;
-    if (filters.myTickets) query.createdBy = userId;
-    if (filters.assignedToMe) query.assignee = userId;
-    if (filters.unassigned) query.assignee = null;
+    
+    // Role-based filtering
+    if (userRole === 'admin') {
+      // Admins see all tickets unless specifically filtered
+      if (filters.myTickets) query.createdBy = userId;
+      if (filters.assignedToMe) query.assignee = userId;
+      if (filters.unassigned) query.assignee = null;
+    } else if (userRole === 'agent') {
+      // Agents see assigned tickets and unassigned tickets
+      if (filters.myTickets) {
+        query.createdBy = userId;
+      } else if (filters.assignedToMe) {
+        query.assignee = userId;
+      } else if (filters.unassigned) {
+        query.assignee = null;
+      } else {
+        // Default: show assigned to me + unassigned
+        query.$or = [{ assignee: userId }, { assignee: null }];
+      }
+    } else {
+      // Users see only their own tickets
+      query.createdBy = userId;
+    }
 
     const skip = (page - 1) * pageSize;
     const [items, total] = await Promise.all([
       Ticket.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(pageSize),
+        .limit(pageSize)
+        .populate('createdBy', 'name email role')
+        .populate('assignee', 'name email role'),
       Ticket.countDocuments(query)
     ]);
 
@@ -66,7 +89,7 @@ export class TicketService {
   }
 
   static getById(id: string) {
-    return Ticket.findById(id);
+    return Ticket.findById(id).populate('createdBy', 'name email role').populate('assignee', 'name email role');
   }
 
   static async addReply(id: string, content: string, authorId: string, authorType: AuthorType) {

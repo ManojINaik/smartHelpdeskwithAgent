@@ -30,8 +30,8 @@ interface TicketsState {
   total: number;
   loading: boolean;
   error: string | null;
-  fetchTickets: (params?: { status?: TicketStatus; my?: boolean; page?: number; pageSize?: number }) => Promise<void>;
-  createTicket: (payload: { title: string; description: string; category?: TicketCategory; attachmentUrls?: string[] }) => Promise<void>;
+  fetchTickets: (params?: { status?: TicketStatus; my?: boolean; page?: number; pageSize?: number; assignedToMe?: boolean; unassigned?: boolean }) => Promise<void>;
+  createTicket: (payload: { title: string; description: string; category?: TicketCategory; attachmentUrls?: string[] }) => Promise<TicketItem>;
   addReply: (ticketId: string, content: string) => Promise<void>;
   assignTicket: (ticketId: string, assigneeId: string) => Promise<void>;
 }
@@ -43,12 +43,42 @@ export const useTicketsStore = create<TicketsState>((set, get) => ({
   error: null,
 
   async fetchTickets(params) {
+    // Prevent multiple simultaneous requests
+    if (get().loading) {
+      return;
+    }
+    
     set({ loading: true, error: null });
     try {
-      const res = await api.get('/api/tickets', { params: { my: params?.my ?? true, status: params?.status, page: params?.page ?? 1, pageSize: params?.pageSize ?? 10 } });
-      set({ items: res.data.items, total: res.data.total, loading: false });
+      const apiParams: any = { 
+        page: params?.page ?? 1, 
+        pageSize: params?.pageSize ?? 10,
+        status: params?.status
+      };
+      
+      if (params?.my) apiParams.my = true;
+      if (params?.assignedToMe) apiParams.assignedToMe = true;
+      if (params?.unassigned) apiParams.unassigned = true;
+      
+      console.log('Fetching tickets with params:', apiParams);
+      const res = await api.get('/api/tickets', { params: apiParams });
+      console.log('Tickets fetched:', res.data);
+      set({ items: res.data.items, total: res.data.total, loading: false, error: null });
     } catch (e: any) {
-      set({ loading: false, error: e?.response?.data?.error?.message || 'Failed to load tickets' });
+      console.error('Failed to fetch tickets:', e);
+      let errorMessage = 'Failed to load tickets';
+      
+      if (e?.response?.data?.error?.message) {
+        errorMessage = e.response.data.error.message;
+      } else if (e?.message) {
+        errorMessage = e.message;
+      } else if (e?.code === 'ERR_NETWORK') {
+        errorMessage = 'Network error - please check your connection';
+      } else if (e?.code === 'ERR_INSUFFICIENT_RESOURCES') {
+        errorMessage = 'Server is temporarily unavailable - please try again later';
+      }
+      
+      set({ loading: false, error: errorMessage });
     }
   },
 
@@ -68,17 +98,22 @@ export const useTicketsStore = create<TicketsState>((set, get) => ({
     };
     set({ items: [optimistic, ...get().items] });
     try {
+      console.log('Creating ticket with payload:', payload);
       const res = await api.post('/api/tickets', payload);
+      console.log('Ticket created successfully:', res.data);
       const real = res.data.ticket as TicketItem;
       set({
         items: get().items.map(it => (it._id === tempId ? real : it))
       });
+      return real;
     } catch (e: any) {
+      console.error('Failed to create ticket:', e);
       // rollback
       set({
         items: get().items.filter(it => it._id !== tempId),
         error: e?.response?.data?.error?.message || 'Failed to create ticket',
       });
+      throw e;
     }
   },
 

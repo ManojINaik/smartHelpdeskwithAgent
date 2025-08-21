@@ -49,6 +49,10 @@ export class KnowledgeBaseService {
     });
   }
 
+  static async getArticle(id: string): Promise<IArticle | null> {
+    return Article.findById(id);
+  }
+
   static async updateArticle(id: string, updates: UpdateArticleData): Promise<IArticle | null> {
     const allowed: UpdateArticleData = {};
     if (typeof updates.title === 'string') allowed.title = updates.title;
