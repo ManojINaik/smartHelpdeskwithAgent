@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { ModernCard } from './ui/card';
+import { NotificationBell } from './NotificationCenter';
 import { 
   BookOpen, 
   Edit3, 
@@ -14,8 +15,7 @@ import {
   BarChart3,
   Users,
   Shield,
-  LogOut,
-  Bell
+  LogOut
 } from 'lucide-react';
 
 const NavLink: React.FC<{ to: string; children: React.ReactNode }> = ({ to, children }) => {
@@ -136,11 +136,7 @@ export const KBLayout: React.FC<{ title?: string; children: React.ReactNode }> =
             )}
             
             {/* Notifications */}
-            <div className="relative">
-              <button className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all">
-                <Bell className="h-5 w-5 text-white" />
-              </button>
-            </div>
+            <NotificationBell />
             
             {/* User Profile */}
             {user && (

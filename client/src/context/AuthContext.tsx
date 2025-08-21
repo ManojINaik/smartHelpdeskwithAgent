@@ -31,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     async function fetchMe() {
       if (!token) {
         setLoading(false);
+        wsClient.disconnect(); // Ensure disconnection when no token
         return;
       }
       try {
@@ -44,10 +45,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } as any;
         setUser(normalized);
 
-        // Connect WebSocket with proper userId
+        // Connect WebSocket with proper userId after user is set
         const userId = normalized.id;
-        if (userId && userId !== 'undefined') {
-          wsClient.connect(userId);
+        if (userId && userId !== 'undefined' && userId !== 'null') {
+          console.log('🔌 Connecting WebSocket for user:', userId);
+          // Use a longer delay to ensure state is properly set and avoid rapid reconnections
+          setTimeout(() => {
+            wsClient.connect(userId);
+          }, 500);
+        } else {
+          console.warn('⚠️ Invalid userId for WebSocket connection:', userId);
         }
       } catch {
         localStorage.removeItem('accessToken');
@@ -79,6 +86,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: u.role,
       } as any;
       setUser(normalized);
+      
+      // WebSocket connection will be handled by useEffect when token changes
       return normalized as User;
     },
     async register(name, email, password) {
@@ -94,9 +103,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: u.role,
       } as any;
       setUser(normalized);
+      
+      // WebSocket connection will be handled by useEffect when token changes
       return normalized as User;
     },
     logout() {
+      console.log('🔌 Disconnecting WebSocket on logout');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       setUser(null);

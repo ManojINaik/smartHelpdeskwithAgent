@@ -3,13 +3,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
+import { NotificationBell } from './NotificationCenter';
 import { 
   BarChart3, 
   Users, 
   Settings, 
   BookOpen, 
   MessageSquare, 
-  Bell,
   Shield,
   LogOut,
   User,
@@ -110,14 +110,7 @@ export const AgentNavbar: React.FC<{ children: React.ReactNode }> = ({ children 
             </div>
             
             {/* Notifications */}
-            <div className="relative">
-              <button className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all">
-                <Bell className="h-5 w-5 text-white" />
-              </button>
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-warning-500 rounded-full flex items-center justify-center">
-                <span className="text-xs font-mulish font-bold text-white">2</span>
-              </div>
-            </div>
+            <NotificationBell />
             
             {/* User Profile */}
             {user && (

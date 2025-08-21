@@ -62,7 +62,7 @@ export const TicketList: React.FC = () => {
             {showFilterOptions && (
               <div className="flex items-center gap-2">
                 <Label variant="modern" size="sm">Filter</Label>
-                <Select value={filter} onValueChange={(value) => setFilter(value as any)}>
+                <Select value={filter || 'all'} onValueChange={(value) => setFilter(value as any)}>
                   <SelectTrigger className="w-40 h-10 rounded-2xl font-mulish font-semibold">
                     <SelectValue />
                   </SelectTrigger>
@@ -78,12 +78,12 @@ export const TicketList: React.FC = () => {
             
             <div className="flex items-center gap-2">
               <Label variant="modern" size="sm">Status</Label>
-              <Select value={status || ''} onValueChange={(value) => setStatus(value as any || undefined)}>
+              <Select value={status || 'all'} onValueChange={(value) => setStatus(value === 'all' ? undefined : value as any)}>
                 <SelectTrigger className="w-36 h-10 rounded-2xl font-mulish font-semibold">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="open">Open</SelectItem>
                   <SelectItem value="triaged">Triaged</SelectItem>
                   <SelectItem value="waiting_human">Waiting Human</SelectItem>

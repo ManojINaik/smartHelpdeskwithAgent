@@ -7,7 +7,12 @@ export function useTickets(auto = true) {
   const { items, total, loading, error, fetchTickets, createTicket, addReply, assignTicket } = useTicketsStore();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<undefined | 'open' | 'triaged' | 'waiting_human' | 'resolved' | 'closed'>(undefined);
-  const [filter, setFilter] = useState<'all' | 'my' | 'assigned' | 'unassigned'>('all');
+  const [filter, setFilter] = useState<'all' | 'my' | 'assigned' | 'unassigned'>(() => {
+    // Set default filter based on user role
+    if (user?.role === 'admin') return 'all';
+    if (user?.role === 'agent') return 'assigned';
+    return 'my';
+  });
   const lastFetchRef = useRef<string>('');
   const timeoutRef = useRef<number | null>(null);
   

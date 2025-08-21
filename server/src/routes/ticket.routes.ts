@@ -4,6 +4,8 @@ import { authenticate, authorize } from '../middleware/auth.js';
 import TicketService from '../services/ticket.service.js';
 import WorkflowOrchestrator from '../services/agent/workflow.js';
 import AuditLogService from '../services/audit.service.js';
+import Notifications from '../services/notify.service.js';
+import User from '../models/User.js';
 
 const router = Router();
 
@@ -59,6 +61,28 @@ router.post('/:id/reply', authenticate, async (req, res): Promise<void> => {
     const authorType = req.user!.role === 'user' ? 'user' : 'agent';
     const ticket = await TicketService.addReply(req.params.id as string, content, authorId, authorType);
     if (!ticket) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Ticket not found' } }); return; }
+    
+    // Send notifications for new replies
+    const replyAuthor = await User.findById(authorId).select('name');
+    if (authorType === 'agent' || authorType === 'user') {
+      // Notify ticket creator if reply is from agent
+      if (authorType === 'agent' && String(ticket.createdBy._id) !== authorId) {
+        Notifications.broadcastToUser(String(ticket.createdBy._id), 'ticket_reply', {
+          ticketId: req.params.id,
+          replyAuthor: replyAuthor?.name || 'Agent',
+          ticketTitle: ticket.title
+        });
+      }
+      // Notify assigned agent if reply is from ticket creator
+      if (authorType === 'user' && ticket.assignee && String(ticket.assignee._id) !== authorId) {
+        Notifications.broadcastToUser(String(ticket.assignee._id), 'ticket_reply', {
+          ticketId: req.params.id,
+          replyAuthor: replyAuthor?.name || 'User',
+          ticketTitle: ticket.title
+        });
+      }
+    }
+    
     res.json({ ticket });
   } catch (err: any) {
     res.status(400).json({ error: { code: 'TICKET_REPLY_FAILED', message: err.message } });
@@ -71,6 +95,28 @@ router.post('/:id/assign', authenticate, authorize(['admin', 'agent']), async (r
     const { assigneeId } = assignSchema.parse(req.body);
     const ticket = await TicketService.assign(req.params.id as string, assigneeId);
     if (!ticket) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Ticket not found' } }); return; }
+    
+    // Send notifications for ticket assignment
+    const assignee = await User.findById(assigneeId).select('name');
+    const assigner = await User.findById(req.user!.sub).select('name');
+    
+    // Notify the assigned agent
+    Notifications.broadcastToUser(assigneeId, 'ticket_assigned', {
+      ticketId: req.params.id,
+      ticketTitle: ticket.title,
+      assignedBy: assigner?.name || 'Admin'
+    });
+    
+    // Notify the ticket creator about assignment
+    if (String(ticket.createdBy._id) !== assigneeId) {
+      Notifications.broadcastToUser(String(ticket.createdBy._id), 'ticket_status', {
+        ticketId: req.params.id,
+        status: ticket.status,
+        ticketTitle: ticket.title,
+        assigneeName: assignee?.name || 'Agent'
+      });
+    }
+    
     res.json({ ticket });
   } catch (err: any) {
     res.status(400).json({ error: { code: 'TICKET_ASSIGN_FAILED', message: err.message } });
@@ -84,7 +130,30 @@ router.put('/:id/status', authenticate, authorize(['admin','agent']), async (req
     const { status } = statusSchema.parse(req.body);
     const ticket = await TicketService.updateStatus(req.params.id as string, status);
     if (!ticket) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Ticket not found' } }); return; }
+    
     await AuditLogService.log(String(ticket._id), req.traceId || 'n/a', 'agent', 'STATUS_CHANGED', { by: req.user!.sub, status });
+    
+    // Send notifications for status changes
+    const updater = await User.findById(req.user!.sub).select('name');
+    
+    // Notify ticket creator about status change
+    Notifications.broadcastToUser(String(ticket.createdBy._id), 'ticket_status', {
+      ticketId: req.params.id,
+      status: status,
+      ticketTitle: ticket.title,
+      updatedBy: updater?.name || 'Agent'
+    });
+    
+    // Notify assigned agent if different from updater
+    if (ticket.assignee && String(ticket.assignee._id) !== req.user!.sub) {
+      Notifications.broadcastToUser(String(ticket.assignee._id), 'ticket_status', {
+        ticketId: req.params.id,
+        status: status,
+        ticketTitle: ticket.title,
+        updatedBy: updater?.name || 'Agent'
+      });
+    }
+    
     res.json({ ticket });
   } catch (err: any) {
     res.status(400).json({ error: { code: 'TICKET_STATUS_UPDATE_FAILED', message: err.message } });

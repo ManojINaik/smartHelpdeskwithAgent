@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { ModernCard } from './ui/card';
+import { NotificationBell } from './NotificationCenter';
 import { 
   BarChart3, 
   Users, 
@@ -12,7 +13,6 @@ import {
   User,
   Shield,
   LogOut,
-  Bell,
   Search
 } from 'lucide-react';
 
@@ -94,7 +94,7 @@ export const AdminLayout: React.FC<{ title?: string; children: React.ReactNode }
           <div className="flex items-center gap-3">
             {/* Search */}
             <div className="hidden md:flex relative">
-              <div className="w-80 h-11 bg-white/20 rounded-3xl flex items-center px-4">
+              <div className="w-64 h-11 bg-white/20 rounded-3xl flex items-center px-4">
                 <Search className="h-4 w-4 text-white/70 mr-3 flex-shrink-0" />
                 <input 
                   type="text" 
@@ -105,14 +105,7 @@ export const AdminLayout: React.FC<{ title?: string; children: React.ReactNode }
             </div>
             
             {/* Notifications */}
-            <div className="relative">
-              <button className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all">
-                <Bell className="h-5 w-5 text-white" />
-              </button>
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-warning-500 rounded-full flex items-center justify-center">
-                <span className="text-xs font-mulish font-bold text-white">3</span>
-              </div>
-            </div>
+            <NotificationBell className="w-11 h-11" />
             
             {/* User Profile */}
             {user && (

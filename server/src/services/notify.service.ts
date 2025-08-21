@@ -40,9 +40,28 @@ class NotificationHub {
 
   broadcastToUser(userId: UserId, event: string, payload: any) {
     const sockets = this.userSockets.get(userId);
-    if (!sockets) return;
+    if (!sockets || sockets.size === 0) {
+      console.log(`⚠️ No active sockets for user ${userId}, notification not sent: ${event}`);
+      return;
+    }
+    
     const data = JSON.stringify({ event, payload });
-    sockets.forEach(ws => { try { ws.send(data); } catch {} });
+    console.log(`📤 Broadcasting to user ${userId}: ${event}`, { payload, socketCount: sockets.size });
+    
+    let successCount = 0;
+    let errorCount = 0;
+    
+    sockets.forEach(ws => { 
+      try { 
+        ws.send(data);
+        successCount++;
+      } catch (error) {
+        console.error(`❌ Failed to send to socket for user ${userId}:`, error);
+        errorCount++;
+      }
+    });
+    
+    console.log(`📤 Notification sent to user ${userId}: ${successCount} success, ${errorCount} errors`);
   }
 }
 
