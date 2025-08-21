@@ -11,18 +11,12 @@ import {
   AlertCircle,
   MessageSquare,
   Calendar,
-  ArrowRight,
-  TestTube,
-  Zap
+  ArrowRight
 } from 'lucide-react';
 
 export const AgentDashboard: React.FC = () => {
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [debugMode, setDebugMode] = useState(false);
-  const [testResult, setTestResult] = useState<any>(null);
-  const [recentSuggestions, setRecentSuggestions] = useState<any[]>([]);
-  const [testLoading, setTestLoading] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -42,35 +36,6 @@ export const AgentDashboard: React.FC = () => {
     }
     load();
   }, []);
-
-  const testAutoTriage = async () => {
-    setTestLoading(true);
-    try {
-      const testCases = [
-        "I have a billing issue with my payment method. The charge was declined but I know my card is working.",
-        "There's a technical error on your website. I keep getting a 500 error when I try to login.",
-        "My package shipment is delayed and the tracking shows no updates for 3 days.",
-        "General question about your service features."
-      ];
-      
-      const results = [];
-      for (const text of testCases) {
-        const response = await api.post('/api/agent/debug/triage-test', { text });
-        results.push(response.data);
-      }
-      
-      setTestResult(results);
-      
-      // Also load recent suggestions
-      const suggestionsResponse = await api.get('/api/agent/debug/recent-suggestions?limit=5');
-      setRecentSuggestions(suggestionsResponse.data.suggestions || []);
-    } catch (error) {
-      console.error('Test failed:', error);
-      setTestResult([{ error: 'Test failed. Check console for details.' }]);
-    } finally {
-      setTestLoading(false);
-    }
-  };
 
   // Group tickets by status
   const waitingAssigned = tickets.filter(t => t.status === 'waiting_human' && t.assignee);
@@ -149,115 +114,6 @@ export const AgentDashboard: React.FC = () => {
         <div className="mb-6 sm:mb-8 lg:mb-10">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-mulish font-bold text-neutral-900 mb-2 sm:mb-3">Agent Dashboard</h1>
           <p className="text-base sm:text-lg font-mulish font-medium text-neutral-600">Manage and respond to support tickets</p>
-        </div>
-
-        {/* Debug Section */}
-        <div className="mb-6 sm:mb-8">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <TestTube className="h-5 w-5 text-yellow-600" />
-                <h2 className="text-lg font-mulish font-bold text-yellow-800">Auto-Triage Debug</h2>
-              </div>
-              <button
-                onClick={() => setDebugMode(!debugMode)}
-                className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-200 transition-colors"
-              >
-                {debugMode ? 'Hide' : 'Show'} Debug
-              </button>
-            </div>
-            
-            {debugMode && (
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <button
-                    onClick={testAutoTriage}
-                    disabled={testLoading}
-                    className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 transition-colors"
-                  >
-                    <Zap className="h-4 w-4" />
-                    {testLoading ? 'Testing...' : 'Test Auto-Triage'}
-                  </button>
-                </div>
-                
-                {testResult && (
-                  <div className="bg-white rounded-lg p-4 border border-yellow-200">
-                    <h3 className="font-bold text-gray-800 mb-3">Test Results:</h3>
-                    <div className="space-y-3">
-                      {testResult.map((result: any, index: number) => (
-                        <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                          <div className="text-sm font-medium text-gray-600 mb-2">Test {index + 1}:</div>
-                          <div className="text-xs text-gray-500 mb-2">{result.input}</div>
-                          <div className="flex gap-4 text-sm">
-                            <span className="font-medium">Category: {result.classification?.predictedCategory}</span>
-                            <span className="font-medium">Confidence: {(result.classification?.confidence * 100)?.toFixed(1)}%</span>
-                            <span className={`font-bold ${
-                              result.willAutoClose ? 'text-green-600' : 'text-orange-600'
-                            }`}>
-                              {result.willAutoClose ? '✅ Auto-Close' : '👤 Human'}
-                            </span>
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">{result.decisionReason}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {recentSuggestions.length > 0 && (
-                  <div className="bg-white rounded-lg p-4 border border-yellow-200">
-                    <h3 className="font-bold text-gray-800 mb-3">Recent Suggestions:</h3>
-                    <div className="space-y-2">
-                      {recentSuggestions.map((suggestion: any, index: number) => (
-                        <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm">
-                          <span className="font-medium">{suggestion.predictedCategory}</span>
-                          <span>{(suggestion.confidence * 100).toFixed(1)}%</span>
-                          <span className={`font-bold ${
-                            suggestion.autoClosed ? 'text-green-600' : 'text-orange-600'
-                          }`}>
-                            {suggestion.autoClosed ? '✅' : '👤'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                <div className="bg-white rounded-lg p-4 border border-yellow-200">
-                  <h3 className="font-bold text-gray-800 mb-3">🎨 AI Response Preview:</h3>
-                  <div className="text-xs text-gray-600 mb-3">Here's what a structured AI response looks like:</div>
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-                    <div className="flex gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded font-medium">🤖 AI Assistant</span>
-                          <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">Auto-Generated</span>
-                        </div>
-                        <div className="bg-white rounded-lg p-3 border text-xs">
-                          <p className="font-semibold text-gray-800 mb-1">Dear Valued Customer,</p>
-                          <p className="text-gray-700 mb-2">Thank you for contacting us about your billing inquiry...</p>
-                          <div className="space-y-1">
-                            <p className="font-semibold text-gray-800">• Recommended Solution:</p>
-                            <p className="text-gray-600 ml-3">1. Verify your account details...</p>
-                            <p className="font-semibold text-gray-800 mt-2">• Additional Resources:</p>
-                            <p className="text-blue-600 ml-3">• Billing FAQ Guide</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-xs text-gray-500">
-                    ✨ Structured responses include sections, formatting, and professional tone
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:gap-10 md:grid-cols-2 xl:grid-cols-4">
