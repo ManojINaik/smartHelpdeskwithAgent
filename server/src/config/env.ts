@@ -41,6 +41,9 @@ const envSchema = z.object({
   // System Configuration
   AUTO_CLOSE_ENABLED: z.string().transform(val => val === 'true').default('true'),
   CONFIDENCE_THRESHOLD: z.string().transform(Number).default('0.8'),
+  LOW_CONFIDENCE_THRESHOLD: z.string().transform(Number).default('0.5'),
+  ESCALATION_ENABLED: z.string().transform(val => val === 'true').default('true'),
+  HIGH_PRIORITY_THRESHOLD: z.string().transform(Number).default('0.3'),
   SLA_HOURS: z.string().transform(Number).default('24'),
   
   // Logging

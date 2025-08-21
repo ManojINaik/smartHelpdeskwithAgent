@@ -38,21 +38,21 @@ export const HomePage: React.FC = () => {
   return (
     <AuthLayout>
       <div className="min-h-[calc(100vh-200px)] bg-[#E2F1FF]">
-        <div className="mx-auto max-w-7xl px-6 py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
           {/* Hero Section */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 sm:mb-8">
             <div className="flex justify-center mb-4">
               <div className="p-3 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full">
-                <MessageSquare className="h-10 w-10 text-white" />
+                <MessageSquare className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl font-mulish font-bold text-neutral-900 mb-3">
+            <h1 className="text-2xl sm:text-3xl font-mulish font-bold text-neutral-900 mb-3">
               Welcome back, {user.name}!
             </h1>
-            <p className="text-lg font-mulish font-medium text-neutral-600 mb-6 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg font-mulish font-medium text-neutral-600 mb-4 sm:mb-6 max-w-2xl mx-auto px-4">
               Here's what's happening with your support tickets and how we can help you today.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center px-4">
               <Button asChild className="h-11 px-6 text-base font-mulish font-bold bg-primary-500 hover:bg-primary-600">
                 <Link to="/kb">
                   <BookOpen className="h-4 w-4 mr-2" />
@@ -79,15 +79,15 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Stats Section */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
             <ModernCard variant="profile" className="shadow-card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-mulish font-semibold text-neutral-400 uppercase tracking-wider">Total Tickets</p>
-                  <p className="text-2xl font-mulish font-bold text-neutral-900 mt-1">{tickets?.length || 0}</p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-mulish font-semibold text-neutral-400 uppercase tracking-wider line-clamp-1">Total Tickets</p>
+                  <p className="text-xl sm:text-2xl font-mulish font-bold text-neutral-900 mt-1">{tickets?.length || 0}</p>
                 </div>
-                <div className="p-3 bg-primary-100 rounded-2xl">
-                  <MessageSquare className="h-6 w-6 text-primary-600" />
+                <div className="p-2 sm:p-3 bg-primary-100 rounded-2xl flex-shrink-0">
+                  <MessageSquare className="h-4 w-4 sm:h-6 sm:w-6 text-primary-600" />
                 </div>
               </div>
             </ModernCard>
@@ -130,18 +130,18 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Create Ticket Section */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 order-2 lg:order-1">
               <ModernCard variant="payment" className="shadow-card h-fit">
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   <div className="flex items-center gap-3 mb-2">
-                    <Plus className="h-5 w-5 text-primary-600" />
-                    <h2 className="text-xl font-mulish font-bold text-neutral-900">
+                    <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
+                    <h2 className="text-lg sm:text-xl font-mulish font-bold text-neutral-900">
                       Create New Ticket
                     </h2>
                   </div>
-                  <p className="text-sm font-mulish font-medium text-neutral-400">
+                  <p className="text-xs sm:text-sm font-mulish font-medium text-neutral-400">
                     Submit a new support request and we'll get back to you as soon as possible.
                   </p>
                 </div>
@@ -150,22 +150,22 @@ export const HomePage: React.FC = () => {
             </div>
 
             {/* Tickets List Section */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 order-1 lg:order-2">
               <ModernCard variant="default" className="shadow-card">
-                <div className="mb-6">
-                  <div className="flex items-center justify-between">
+                <div className="mb-4 sm:mb-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                     <div>
                       <div className="flex items-center gap-3 mb-2">
-                        <MessageSquare className="h-5 w-5 text-primary-600" />
-                        <h2 className="text-xl font-mulish font-bold text-neutral-900">
+                        <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
+                        <h2 className="text-lg sm:text-xl font-mulish font-bold text-neutral-900">
                           Your Support Tickets
                         </h2>
                       </div>
-                      <p className="text-sm font-mulish font-medium text-neutral-400">
+                      <p className="text-xs sm:text-sm font-mulish font-medium text-neutral-400">
                         Track the status of your support requests and view responses from our team.
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={refresh} disabled={loading} className="font-mulish font-semibold">
+                    <Button variant="outline" size="sm" onClick={refresh} disabled={loading} className="font-mulish font-semibold w-full sm:w-auto">
                       {loading ? (
                         <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
                       ) : (

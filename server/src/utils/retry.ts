@@ -6,6 +6,13 @@ export interface RetryOptions {
   timeoutMs?: number;
 }
 
+export interface ExponentialBackoffOptions {
+  maxRetries?: number;
+  baseDelay?: number;
+  maxDelay?: number;
+  factor?: number;
+}
+
 export async function retry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
   const retries = options.retries ?? 3;
   let delay = options.minDelayMs ?? 200;
@@ -30,6 +37,35 @@ export async function retry<T>(fn: () => Promise<T>, options: RetryOptions = {})
     }
   }
   clearTimeout(timeout);
+  throw lastError;
+}
+
+export async function retryWithExponentialBackoff<T>(
+  fn: () => Promise<T>, 
+  options: ExponentialBackoffOptions = {}
+): Promise<T> {
+  const maxRetries = options.maxRetries ?? 3;
+  const baseDelay = options.baseDelay ?? 1000;
+  const maxDelay = options.maxDelay ?? 10000;
+  const factor = options.factor ?? 2;
+
+  let lastError: any;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      
+      if (attempt === maxRetries) {
+        throw lastError;
+      }
+      
+      const delay = Math.min(maxDelay, baseDelay * Math.pow(factor, attempt));
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
   throw lastError;
 }
 

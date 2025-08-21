@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/button';
@@ -12,7 +12,9 @@ import {
   Settings, 
   User,
   Shield,
-  LogOut
+  LogOut,
+  Menu,
+  X
 } from 'lucide-react';
 
 const NavLink: React.FC<{ to: string; children: React.ReactNode }> = ({ to, children }) => {
@@ -34,18 +36,19 @@ const NavLink: React.FC<{ to: string; children: React.ReactNode }> = ({ to, chil
 
 export const AdminLayout: React.FC<{ title?: string; children: React.ReactNode }> = ({ title, children }) => {
   const { user, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   return (
     <div className="min-h-screen bg-background">
       {/* Modern Admin Header */}
       <header className="sticky top-0 z-30 bg-primary-500 gradient-primary shadow-card">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-3">
+          <div className="flex items-center gap-4 sm:gap-6">
             <Link to="/admin/metrics" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
-                <Shield className="h-6 w-6 text-white" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-white/20 flex items-center justify-center">
+                <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div>
+              <div className="hidden sm:block">
                 <span className="text-lg font-mulish font-bold text-white">
                   Smart Helpdesk
                 </span>
@@ -55,7 +58,7 @@ export const AdminLayout: React.FC<{ title?: string; children: React.ReactNode }
               </div>
             </Link>
             
-            {/* Admin Navigation */}
+            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
               <NavLink to="/admin/metrics">
                 <div className="flex items-center gap-2">
@@ -90,15 +93,27 @@ export const AdminLayout: React.FC<{ title?: string; children: React.ReactNode }
             </nav>
           </div>
           
-          <div className="flex items-center gap-3">
-
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden text-white/90 hover:text-white hover:bg-white/20 w-9 h-9 p-0"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </Button>
             
             {/* Notifications */}
-            <NotificationBell className="w-11 h-11" />
+            <NotificationBell className="w-9 h-9 sm:w-11 sm:h-11" />
             
             {/* User Profile */}
             {user && (
-              <div className="flex items-center gap-3 pl-2">
+              <div className="flex items-center gap-2 sm:gap-3 pl-1 sm:pl-2">
                 <div className="hidden sm:block text-right">
                   <p className="text-sm font-mulish font-bold text-white leading-tight">
                     {user.email || user.name}
@@ -109,31 +124,79 @@ export const AdminLayout: React.FC<{ title?: string; children: React.ReactNode }
                     </Badge>
                   </div>
                 </div>
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-warning-400 to-warning-500 flex items-center justify-center">
-                  <User className="h-5 w-5 text-white" />
+                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-warning-400 to-warning-500 flex items-center justify-center">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={logout}
-                  className="text-white/90 hover:text-white hover:bg-white/20 w-9 h-9 p-0"
+                  className="text-white/90 hover:text-white hover:bg-white/20 w-8 h-8 sm:w-9 sm:h-9 p-0"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             )}
           </div>
         </div>
+        
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-white/20 bg-primary-600">
+            <nav className="px-4 py-4 space-y-2">
+              <Link
+                to="/admin/metrics"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl text-white/90 hover:bg-white/20 hover:text-white transition-all"
+              >
+                <BarChart3 className="h-5 w-5" />
+                <span className="font-mulish font-semibold">Metrics</span>
+              </Link>
+              <Link
+                to="/kb"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl text-white/90 hover:bg-white/20 hover:text-white transition-all"
+              >
+                <BookOpen className="h-5 w-5" />
+                <span className="font-mulish font-semibold">Knowledge Base</span>
+              </Link>
+              <Link
+                to="/agent"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl text-white/90 hover:bg-white/20 hover:text-white transition-all"
+              >
+                <User className="h-5 w-5" />
+                <span className="font-mulish font-semibold">Agent View</span>
+              </Link>
+              <Link
+                to="/admin/users"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl text-white/90 hover:bg-white/20 hover:text-white transition-all"
+              >
+                <Users className="h-5 w-5" />
+                <span className="font-mulish font-semibold">Users</span>
+              </Link>
+              <Link
+                to="/admin/config"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl text-white/90 hover:bg-white/20 hover:text-white transition-all"
+              >
+                <Settings className="h-5 w-5" />
+                <span className="font-mulish font-semibold">Settings</span>
+              </Link>
+            </nav>
+          </div>
+        )}
       </header>
       
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
         {title && (
-          <div className="mb-8">
-            <h1 className="text-4xl font-mulish font-bold text-primary-800 mb-2">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-mulish font-bold text-primary-800 mb-2">
               {title}
             </h1>
-            <p className="text-lg font-mulish font-medium text-neutral-400">
+            <p className="text-base sm:text-lg font-mulish font-medium text-neutral-400">
               Manage and monitor your helpdesk system
             </p>
           </div>

@@ -17,8 +17,17 @@ export interface UpdateArticleData {
 }
 
 export class KnowledgeBaseService {
+  static async getAllArticles(includeUnpublished = false): Promise<IArticle[]> {
+    const filter: any = includeUnpublished ? {} : { status: 'published' };
+    return Article.find(filter).sort({ createdAt: -1 });
+  }
+
   static async searchArticles(query: string, includeUnpublished = false): Promise<IArticle[]> {
-    if (!query || query.trim().length === 0) return [];
+    // If no query provided, return all published articles (or all if includeUnpublished)
+    if (!query || query.trim().length === 0) {
+      const filter: any = includeUnpublished ? {} : { status: 'published' };
+      return Article.find(filter).sort({ createdAt: -1 }).limit(50);
+    }
 
     // Use MongoDB text search first
     const results = await (Article as any).searchByText(query, includeUnpublished);

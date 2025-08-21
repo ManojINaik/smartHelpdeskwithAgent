@@ -6,8 +6,10 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Save, Plus, AlertCircle, CheckCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Save, Plus, AlertCircle, CheckCircle, Eye, Edit } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 
 export const KBEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -134,12 +136,41 @@ export const KBEditor: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Content
               </label>
-              <Textarea
-                value={body}
-                onChange={e => setBody(e.target.value)}
-                placeholder="Write your article content here..."
-                rows={12}
-              />
+              <Tabs defaultValue="edit" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="edit" className="flex items-center gap-2">
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </TabsTrigger>
+                  <TabsTrigger value="preview" className="flex items-center gap-2">
+                    <Eye className="h-4 w-4" />
+                    Preview
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="edit" className="mt-2">
+                  <Textarea
+                    value={body}
+                    onChange={e => setBody(e.target.value)}
+                    placeholder="Write your article content using markdown...&#10;&#10;# Main Heading&#10;## Subheading&#10;### Smaller Heading&#10;&#10;Use **bold** and *italic* text.&#10;&#10;### Lists&#10;- Item 1&#10;- Item 2&#10;- Item 3&#10;&#10;### Numbered Lists&#10;1. First item&#10;2. Second item&#10;3. Third item&#10;&#10;### Code&#10;Use `inline code` or:&#10;&#10;```&#10;code block&#10;console.log('Hello World');&#10;```&#10;&#10;### Links&#10;[Link text](https://example.com)&#10;&#10;### Blockquotes&#10;> This is a blockquote&#10;> with multiple lines"
+                    rows={16}
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    💡 <strong>Markdown Guide:</strong> Use # for headings, **bold**, *italic*, `code`, lists with -, links [text](url), and &gt; for quotes. Switch to Preview to see formatted result.
+                  </p>
+                </TabsContent>
+                <TabsContent value="preview" className="mt-2">
+                  <div className="border rounded-md p-4 min-h-[400px] bg-white">
+                    {body.trim() ? (
+                      <MarkdownRenderer content={body} />
+                    ) : (
+                      <div className="text-gray-500 italic text-center py-8">
+                        Start writing in the Edit tab to see a preview here...
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
 
             <div>

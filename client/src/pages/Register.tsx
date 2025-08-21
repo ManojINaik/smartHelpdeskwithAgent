@@ -62,9 +62,9 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Side - Registration Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-white">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 bg-white">
         <div className="w-full max-w-sm space-y-6">
           {/* Header */}
           <div className="text-center">
@@ -73,10 +73,10 @@ export const Register: React.FC = () => {
                 <Shield className="h-6 w-6 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl font-mulish font-bold text-primary-800 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-mulish font-bold text-primary-800 mb-2">
               Join Smart Helpdesk
             </h1>
-            <p className="text-base font-mulish font-medium text-neutral-500">
+            <p className="text-sm sm:text-base font-mulish font-medium text-neutral-500">
               Create your account and get started today
             </p>
           </div>
@@ -101,7 +101,7 @@ export const Register: React.FC = () => {
                     id="name"
                     type="text"
                     placeholder="Enter your full name"
-                    className="pl-10 h-11 rounded-xl border-2 border-neutral-200 bg-white font-mulish font-semibold text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500"
+                    className="pl-10 h-12 rounded-xl border-2 border-neutral-200 bg-white font-mulish font-semibold text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 text-base"
                     {...register('name')}
                   />
                 </div>
@@ -123,7 +123,7 @@ export const Register: React.FC = () => {
                     id="email"
                     type="email"
                     placeholder="Enter your email"
-                    className="pl-10 h-11 rounded-xl border-2 border-neutral-200 bg-white font-mulish font-semibold text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500"
+                    className="pl-10 h-12 rounded-xl border-2 border-neutral-200 bg-white font-mulish font-semibold text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 text-base"
                     {...register('email')}
                   />
                 </div>
@@ -145,7 +145,7 @@ export const Register: React.FC = () => {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Create a strong password"
-                    className="pl-10 pr-10 h-11 rounded-xl border-2 border-neutral-200 bg-white font-mulish font-semibold text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500"
+                    className="pl-10 pr-10 h-12 rounded-xl border-2 border-neutral-200 bg-white font-mulish font-semibold text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 text-base"
                     {...register('password')}
                   />
                   <button
@@ -186,7 +186,7 @@ export const Register: React.FC = () => {
               <Button
                 type="submit"
                 disabled={isSubmitting || isLoading}
-                className="w-full h-11 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-mulish font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:transform hover:-translate-y-0.5"
+                className="w-full h-12 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-mulish font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:transform hover:-translate-y-0.5"
               >
                 {isSubmitting || isLoading ? (
                   <div className="flex items-center gap-3">

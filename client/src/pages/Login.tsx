@@ -60,9 +60,9 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-white">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 bg-white">
         <div className="w-full max-w-sm space-y-6">
           {/* Header */}
           <div className="text-center">
@@ -71,10 +71,10 @@ export const Login: React.FC = () => {
                 <Shield className="h-6 w-6 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl font-mulish font-bold text-primary-800 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-mulish font-bold text-primary-800 mb-2">
               Welcome back
             </h1>
-            <p className="text-base font-mulish font-medium text-neutral-500">
+            <p className="text-sm sm:text-base font-mulish font-medium text-neutral-500">
               Sign in to your Smart Helpdesk account
             </p>
           </div>
@@ -99,7 +99,7 @@ export const Login: React.FC = () => {
                     id="email"
                     type="email"
                     placeholder="Enter your email"
-                    className="pl-10 h-11 rounded-xl border-2 border-neutral-200 bg-white font-mulish font-semibold text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500"
+                    className="pl-10 h-12 rounded-xl border-2 border-neutral-200 bg-white font-mulish font-semibold text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 text-base"
                     {...register('email')}
                   />
                 </div>
@@ -121,7 +121,7 @@ export const Login: React.FC = () => {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
-                    className="pl-10 pr-10 h-11 rounded-xl border-2 border-neutral-200 bg-white font-mulish font-semibold text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500"
+                    className="pl-10 pr-10 h-12 rounded-xl border-2 border-neutral-200 bg-white font-mulish font-semibold text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 text-base"
                     {...register('password')}
                   />
                   <button
@@ -140,7 +140,7 @@ export const Login: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -162,7 +162,7 @@ export const Login: React.FC = () => {
               <Button
                 type="submit"
                 disabled={isSubmitting || isLoading}
-                className="w-full h-11 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-mulish font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:transform hover:-translate-y-0.5"
+                className="w-full h-12 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-mulish font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:transform hover:-translate-y-0.5"
               >
                 {isSubmitting || isLoading ? (
                   <div className="flex items-center gap-3">
@@ -187,8 +187,8 @@ export const Login: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="h-10 rounded-xl border-2 border-neutral-200 hover:border-primary-300 font-mulish font-semibold text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <Button variant="outline" className="h-11 rounded-xl border-2 border-neutral-200 hover:border-primary-300 font-mulish font-semibold text-sm">
                 <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"

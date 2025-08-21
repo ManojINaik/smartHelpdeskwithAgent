@@ -215,15 +215,301 @@ body {
   background: linear-gradient(180deg, rgba(44, 16, 215, 0.23) 0%, rgba(44, 16, 215, 0) 100%);
 }
 
+/* Enhanced Mobile Responsiveness */
 @media (max-width: 640px) {
   .app-container { 
-    margin: 16px; 
+    margin: 12px; 
     padding: 16px 12px; 
   }
   
   .modern-card,
   .payment-card {
-    padding: 24px;
-    border-radius: 24px;
+    padding: 20px;
+    border-radius: 20px;
+  }
+  
+  .profile-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    margin: 8px;
+    padding: 12px 8px;
+  }
+  
+  .modern-card,
+  .payment-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+  
+  .profile-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+}
+
+/* Mobile-optimized utilities */
+@media (max-width: 768px) {
+  .mobile-stack {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  
+  .mobile-full {
+    width: 100% !important;
+  }
+  
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-center {
+    text-align: center !important;
+  }
+}
+
+/* Touch-friendly button sizing */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  button, .btn {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+  
+  input, textarea, select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Improved mobile typography */
+@media (max-width: 640px) {
+  .heading-primary {
+    font-size: 24px;
+    line-height: 30px;
+  }
+  
+  .heading-secondary {
+    font-size: 20px;
+    line-height: 26px;
+  }
+  
+  h1 {
+    font-size: 28px !important;
+    line-height: 34px !important;
+  }
+  
+  h2 {
+    font-size: 24px !important;
+    line-height: 30px !important;
+  }
+  
+  h3 {
+    font-size: 20px !important;
+    line-height: 26px !important;
+  }
+}
+
+/* Mobile navigation utilities */
+@media (max-width: 1024px) {
+  .mobile-nav-hidden {
+    display: none;
+  }
+  
+  .mobile-nav-visible {
+    display: flex;
+  }
+}
+
+/* Enhanced markdown content styling */
+.prose {
+  color: #374151;
+  max-width: none;
+  line-height: 1.7;
+}
+
+.prose h1 {
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.75rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.prose h1:first-child {
+  margin-top: 0;
+}
+
+.prose h2 {
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.prose h3 {
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.prose h4,
+.prose h5,
+.prose h6 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.prose p {
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+.prose ul,
+.prose ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin: 0.25rem 0;
+  color: #374151;
+}
+
+.prose strong {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.prose em {
+  font-style: italic;
+  color: #4b5563;
+}
+
+.prose code {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: 'Courier New', monospace;
+}
+
+.prose pre {
+  background-color: #f3f4f6;
+  overflow-x: auto;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #1f2937;
+}
+
+.prose blockquote {
+  border-left: 4px solid #3b82f6;
+  padding: 0.5rem 1rem;
+  margin: 1rem 0;
+  background-color: #eff6ff;
+  border-radius: 0.25rem;
+  font-style: italic;
+  color: #1f2937;
+}
+
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.prose th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.prose td {
+  color: #374151;
+}
+
+.prose a {
+  color: #3b82f6;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.prose a:hover {
+  color: #1d4ed8;
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 2rem 0;
+}
+
+/* Mobile responsive markdown */
+@media (max-width: 640px) {
+  .prose {
+    font-size: 14px;
+  }
+  
+  .prose h1 {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  .prose h2 {
+    font-size: 1.25rem;
+    margin-top: 1.25rem;
+  }
+  
+  .prose h3 {
+    font-size: 1.125rem;
+    margin-top: 1rem;
+  }
+  
+  .prose table {
+    font-size: 12px;
+  }
+  
+  .prose th,
+  .prose td {
+    padding: 0.5rem;
+  }
+  
+  .prose pre {
+    padding: 0.75rem;
+    font-size: 12px;
   }
 }

@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Edit3, Calendar, Tag, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 
 interface Article {
   _id: string;
@@ -108,11 +109,10 @@ export const KBArticle: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="prose max-w-none">
-              <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-                {article.body}
-              </div>
-            </div>
+            <MarkdownRenderer 
+              content={article.body} 
+              className="mb-6"
+            />
             
             {article.tags && article.tags.length > 0 && (
               <div className="mt-6 pt-6 border-t border-gray-200">

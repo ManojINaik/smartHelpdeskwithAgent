@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { AdminLayout } from '../components/AdminLayout';
 import { AgentNavbar } from '../components/AgentNavbar';
 import { AuthLayout } from '../components/AuthLayout';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -285,30 +286,89 @@ export const TicketDetail: React.FC = () => {
                 {/* Replies */}
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {ticket.replies?.length > 0 ? (
-                    ticket.replies.map((r: any) => (
-                      <div key={r._id} className="flex gap-3 p-3 rounded-lg bg-gray-50 border">
-                        <div className="flex-shrink-0">
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                            <User className="h-4 w-4 text-indigo-600" />
+                    ticket.replies.map((r: any) => {
+                      const isSystemReply = r.authorType === 'system';
+                      const isAgentReply = r.authorType === 'agent';
+                      const isAIStructured = isSystemReply || (isAgentReply && r.content.includes('**'));
+                      
+                      return (
+                        <div 
+                          key={r._id} 
+                          className={`flex gap-3 p-4 rounded-xl border transition-all hover:shadow-sm ${
+                            isSystemReply 
+                              ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200' 
+                              : isAgentReply
+                              ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'
+                              : 'bg-gray-50 border-gray-200'
+                          }`}
+                        >
+                          <div className="flex-shrink-0">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                              isSystemReply 
+                                ? 'bg-blue-100 text-blue-600' 
+                                : isAgentReply
+                                ? 'bg-green-100 text-green-600'
+                                : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {isSystemReply ? (
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                              ) : (
+                                <User className="h-5 w-5" />
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <Badge 
+                                  variant="outline" 
+                                  className={`text-xs font-medium ${
+                                    isSystemReply 
+                                      ? 'border-blue-300 text-blue-700 bg-blue-50' 
+                                      : isAgentReply
+                                      ? 'border-green-300 text-green-700 bg-green-50'
+                                      : 'border-gray-300 text-gray-700 bg-gray-50'
+                                  }`}
+                                >
+                                  {isSystemReply ? '🤖 AI Assistant' : isAgentReply ? '👨‍💼 Support Agent' : '👤 Customer'}
+                                </Badge>
+                                {isSystemReply && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Auto-Generated
+                                  </Badge>
+                                )}
+                              </div>
+                              <span className="text-xs text-gray-500 font-medium">
+                                {formatDate(r.createdAt)}
+                              </span>
+                            </div>
+                            
+                            {/* Render content with markdown for structured AI responses */}
+                            {isAIStructured ? (
+                              <div className="bg-white rounded-lg p-4 border border-opacity-50">
+                                <MarkdownRenderer 
+                                  content={r.content} 
+                                  className="text-sm prose-sm"
+                                />
+                              </div>
+                            ) : (
+                              <div className="bg-white rounded-lg p-3 border border-opacity-30">
+                                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                  {r.content}
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <Badge variant="outline" className="text-xs">
-                              {r.authorType}
-                            </Badge>
-                            <span className="text-xs text-gray-500">
-                              {formatDate(r.createdAt)}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-700">{r.content}</p>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
-                    <div className="text-center py-6 text-gray-500">
-                      <MessageSquare className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                      <p>No replies yet</p>
+                    <div className="text-center py-8 text-gray-500">
+                      <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                      <h3 className="font-medium text-gray-600 mb-1">No conversation yet</h3>
+                      <p className="text-sm">Start the conversation by sending a reply below</p>
                     </div>
                   )}
                 </div>

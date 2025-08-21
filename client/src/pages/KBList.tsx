@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/badge';
 import { Search, Edit3, Calendar, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 
 interface Article {
   _id: string;
@@ -25,7 +26,47 @@ export const KBList: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Function to extract clean preview text from markdown
+  const getPreviewText = (markdownContent: string, maxLength: number = 200): string => {
+    // Remove markdown formatting for preview
+    let preview = markdownContent
+      .replace(/#{1,6}\s+/g, '') // Remove headers
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic
+      .replace(/`(.*?)`/g, '$1') // Remove inline code
+      .replace(/```[\s\S]*?```/g, '[Code Block]') // Replace code blocks
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links, keep text
+      .replace(/\n+/g, ' ') // Replace newlines with spaces
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+    
+    if (preview.length > maxLength) {
+      preview = preview.substring(0, maxLength).trim() + '...';
+    }
+    
+    return preview || 'No content preview available';
+  };
+
+  async function loadAllArticles() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get('/api/kb/all');
+      setArticles(res.data.results);
+    } catch (e: any) {
+      setError(e?.response?.data?.error?.message || 'Failed to load articles');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function search() {
+    if (!query.trim()) {
+      // If query is empty, load all articles instead of searching
+      loadAllArticles();
+      return;
+    }
+    
     setLoading(true); 
     setError(null);
     try {
@@ -39,7 +80,7 @@ export const KBList: React.FC = () => {
   }
 
   useEffect(() => { 
-    search(); 
+    loadAllArticles(); 
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -86,7 +127,17 @@ export const KBList: React.FC = () => {
             {articles.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <Search className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>No articles found. Try adjusting your search terms.</p>
+                {query.trim() ? (
+                  <>
+                    <p>No articles found for "{query}".</p>
+                    <p className="text-sm mt-1">Try adjusting your search terms.</p>
+                  </>
+                ) : (
+                  <>
+                    <p>No knowledge base articles found.</p>
+                    <p className="text-sm mt-1">Create your first article to get started.</p>
+                  </>
+                )}
               </div>
             ) : (
               articles.map(article => (
@@ -123,7 +174,7 @@ export const KBList: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-700 line-clamp-3 mb-3">
-                      {article.body}
+                      {getPreviewText(article.body)}
                     </p>
                     {article.tags && article.tags.length > 0 && (
                       <div className="flex items-center gap-2">

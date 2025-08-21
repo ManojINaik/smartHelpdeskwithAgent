@@ -115,13 +115,13 @@ export const CreateTicketForm: React.FC = () => {
           </div>
 
           {/* Category and Priority Row */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 space-y-2">
               <Label variant="modern" className="text-neutral-400">
                 Category
               </Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="h-15 rounded-lg border-2 border-neutral-200 bg-background font-mulish font-bold text-primary-800">
+                <SelectTrigger className="h-12 sm:h-15 rounded-lg border-2 border-neutral-200 bg-background font-mulish font-bold text-primary-800">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -137,7 +137,7 @@ export const CreateTicketForm: React.FC = () => {
               <Label variant="modern" className="text-neutral-400">
                 Priority
               </Label>
-              <div className="h-15 rounded-lg border-2 border-neutral-200 bg-background flex items-center px-5">
+              <div className="h-12 sm:h-15 rounded-lg border-2 border-neutral-200 bg-background flex items-center px-4 sm:px-5">
                 <Badge variant="accent" size="sm">
                   NORMAL
                 </Badge>
@@ -153,9 +153,9 @@ export const CreateTicketForm: React.FC = () => {
             <Textarea
               variant="modern"
               placeholder="Please provide detailed information about your issue..."
-              rows={5}
+              rows={4}
               {...register('description')}
-              className={`font-mulish font-medium resize-none ${
+              className={`font-mulish font-medium resize-none text-sm sm:text-base ${
                 errors.description ? 'border-red-500 focus-visible:border-red-500' : ''
               }`}
             />
@@ -181,11 +181,11 @@ export const CreateTicketForm: React.FC = () => {
                       ? v.split(',').map((s: string) => s.trim()).filter(Boolean) 
                       : v
                 } as any)}
-                className={`font-mulish font-medium ${
+                className={`font-mulish font-medium text-sm sm:text-base ${
                   errors.attachmentUrls ? 'border-red-500 focus-visible:border-red-500' : ''
                 }`}
               />
-              <div className="absolute right-4 top-4">
+              <div className="absolute right-4 top-3 sm:top-4">
                 <Paperclip className="w-5 h-5 text-neutral-400" />
               </div>
             </div>
@@ -200,7 +200,7 @@ export const CreateTicketForm: React.FC = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-between pt-3">
+          <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 pt-3">
             <Button 
               type="button" 
               variant="secondary"
@@ -212,7 +212,7 @@ export const CreateTicketForm: React.FC = () => {
                 setSuccessMessage(null);
               }}
               disabled={isSubmitting}
-              className="font-mulish font-bold"
+              className="font-mulish font-bold w-full sm:w-auto order-2 sm:order-1"
             >
               Cancel
             </Button>
@@ -221,7 +221,7 @@ export const CreateTicketForm: React.FC = () => {
               type="submit" 
               size="default"
               disabled={isSubmitting}
-              className="font-mulish font-bold min-w-[120px] bg-primary-500 hover:bg-primary-600"
+              className="font-mulish font-bold min-w-[120px] w-full sm:w-auto bg-primary-500 hover:bg-primary-600 order-1 sm:order-2"
             >
               {isSubmitting ? (
                 <>

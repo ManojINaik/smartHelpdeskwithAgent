@@ -12,6 +12,18 @@ router.get('/', async (req, res) => {
   res.json({ results });
 });
 
+// Get all articles - admin can see drafts, others see published only
+router.get('/all', async (req, res) => {
+  try {
+    const isAdmin = req.user?.role === 'admin';
+    const includeUnpublished = isAdmin;
+    const results = await KnowledgeBaseService.getAllArticles(includeUnpublished);
+    res.json({ results });
+  } catch (err: any) {
+    res.status(500).json({ error: { code: 'KB_LIST_FAILED', message: err.message } });
+  }
+});
+
 // Get individual article (public or authenticated user)
 router.get('/:id', async (req, res) => {
   try {

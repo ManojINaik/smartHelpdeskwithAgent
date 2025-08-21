@@ -32,9 +32,10 @@
     "restore": "docker-compose exec mongodb mongorestore /backup/$2"
   },
   "dependencies": {
-    "mongodb-memory-server": "^10.2.0"
+    "mongodb-memory-server": "^10.2.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
-  "devDependencies": {},
   "keywords": [
     "helpdesk",
     "ai",

@@ -47,7 +47,7 @@ export const TicketList: React.FC = () => {
     <div className="space-y-4">
       {/* Modern Filter Controls */}
       <ModernCard variant="profile" className="shadow-soft">
-        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-primary-500" />
             <span className="font-mulish font-bold text-base text-neutral-900">
@@ -58,12 +58,12 @@ export const TicketList: React.FC = () => {
             </Badge>
           </div>
           
-          <div className="flex flex-wrap items-center gap-3 flex-1">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
             {showFilterOptions && (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                 <Label variant="modern" size="sm">Filter</Label>
                 <Select value={filter || 'all'} onValueChange={(value) => setFilter(value as any)}>
-                  <SelectTrigger className="w-36 h-9 rounded-2xl font-mulish font-semibold">
+                  <SelectTrigger className="w-full sm:w-36 h-9 rounded-2xl font-mulish font-semibold">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -76,10 +76,10 @@ export const TicketList: React.FC = () => {
               </div>
             )}
             
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <Label variant="modern" size="sm">Status</Label>
               <Select value={status || 'all'} onValueChange={(value) => setStatus(value === 'all' ? undefined : value as any)}>
-                <SelectTrigger className="w-32 h-9 rounded-2xl font-mulish font-semibold">
+                <SelectTrigger className="w-full sm:w-32 h-9 rounded-2xl font-mulish font-semibold">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
@@ -93,10 +93,13 @@ export const TicketList: React.FC = () => {
               </Select>
             </div>
             
-            <div className="flex items-center gap-2">
-              <SortAsc className="w-4 h-4 text-neutral-400" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <div className="flex items-center gap-2">
+                <SortAsc className="w-4 h-4 text-neutral-400" />
+                <Label variant="modern" size="sm" className="sm:hidden">Sort</Label>
+              </div>
               <Select value={sort} onValueChange={(value) => setSort(value as any)}>
-                <SelectTrigger className="w-28 h-9 rounded-2xl font-mulish font-semibold">
+                <SelectTrigger className="w-full sm:w-28 h-9 rounded-2xl font-mulish font-semibold">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -108,7 +111,7 @@ export const TicketList: React.FC = () => {
             </div>
           </div>
           
-          <div className="text-sm font-mulish font-medium text-neutral-400">
+          <div className="text-sm font-mulish font-medium text-neutral-400 text-center sm:text-left">
             Page {page} of {totalPages}
           </div>
         </div>
@@ -131,46 +134,48 @@ export const TicketList: React.FC = () => {
 
       {/* Tickets List */}
       {!loading && !error && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
           {sorted.map(t => (
             <ModernCard key={t._id} variant="profile" className="hover:shadow-xl transition-all duration-200 hover:-translate-y-1 shadow-soft">
               <div className="space-y-3">
                 {/* Ticket Header */}
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
                     <Link 
                       to={`/tickets/${t._id}`} 
-                      className="font-mulish font-bold text-base text-primary-800 hover:text-primary-600 transition-colors line-clamp-2"
+                      className="font-mulish font-bold text-sm sm:text-base text-primary-800 hover:text-primary-600 transition-colors line-clamp-2 block"
                     >
                       {t.title}
                     </Link>
                     <div className="flex items-center gap-2 mt-1">
-                      <Calendar className="w-3 h-3 text-neutral-400" />
-                      <span className="text-xs font-mulish font-medium text-neutral-400">
+                      <Calendar className="w-3 h-3 text-neutral-400 flex-shrink-0" />
+                      <span className="text-xs font-mulish font-medium text-neutral-400 truncate">
                         {new Date(t.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
-                  <TicketStatus status={t.status} />
+                  <div className="flex-shrink-0">
+                    <TicketStatus status={t.status} />
+                  </div>
                 </div>
                 
                 {/* Ticket Description */}
-                <p className="text-sm font-mulish font-medium text-neutral-600 line-clamp-2">
+                <p className="text-xs sm:text-sm font-mulish font-medium text-neutral-600 line-clamp-2">
                   {t.description}
                 </p>
                 
                 {/* Ticket Meta Info */}
                 <div className="flex items-center justify-between pt-2 border-t border-neutral-200">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1">
-                      <MessageSquare className="w-3 h-3 text-neutral-400" />
-                      <span className="text-xs font-mulish font-semibold text-neutral-400">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div className="flex items-center gap-1 min-w-0">
+                      <MessageSquare className="w-3 h-3 text-neutral-400 flex-shrink-0" />
+                      <span className="text-xs font-mulish font-semibold text-neutral-400 truncate">
                         {t.category || 'General'}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <User className="w-3 h-3 text-neutral-400" />
-                      <span className="text-xs font-mulish font-semibold text-neutral-400">
+                    <div className="flex items-center gap-1 min-w-0">
+                      <User className="w-3 h-3 text-neutral-400 flex-shrink-0" />
+                      <span className="text-xs font-mulish font-semibold text-neutral-400 truncate">
                         Unassigned
                       </span>
                     </div>
@@ -197,19 +202,19 @@ export const TicketList: React.FC = () => {
 
       {/* Modern Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button 
             variant="outline" 
             size="lg"
             disabled={page <= 1} 
             onClick={() => setPage(page - 1)}
-            className="font-mulish font-semibold"
+            className="font-mulish font-semibold w-full sm:w-auto"
           >
             <ChevronLeft className="w-4 h-4 mr-2" />
             Previous
           </Button>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const pageNum = Math.max(1, page - 2) + i;
               if (pageNum > totalPages) return null;
@@ -220,7 +225,7 @@ export const TicketList: React.FC = () => {
                   variant={pageNum === page ? "default" : "ghost"}
                   size="icon"
                   onClick={() => setPage(pageNum)}
-                  className="w-10 h-10 font-mulish font-semibold"
+                  className="w-8 h-8 sm:w-10 sm:h-10 font-mulish font-semibold text-sm flex-shrink-0"
                 >
                   {pageNum}
                 </Button>
@@ -233,7 +238,7 @@ export const TicketList: React.FC = () => {
             size="lg"
             disabled={page >= totalPages} 
             onClick={() => setPage(page + 1)}
-            className="font-mulish font-semibold"
+            className="font-mulish font-semibold w-full sm:w-auto"
           >
             Next
             <ChevronRight className="w-4 h-4 ml-2" />
