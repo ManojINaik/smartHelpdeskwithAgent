@@ -1,5 +1,56 @@
 {
+  "name": "smart-helpdesk",
+  "version": "1.0.0",
+  "description": "AI-powered smart helpdesk system with automated ticket triage",
+  "scripts": {
+    "dev": "docker-compose up -d",
+    "dev:build": "docker-compose up --build -d",
+    "dev:down": "docker-compose down",
+    "dev:logs": "docker-compose logs -f",
+    "dev:restart": "docker-compose restart",
+    "prod": "docker-compose -f docker-compose.prod.yml up -d",
+    "prod:build": "docker-compose -f docker-compose.prod.yml up --build -d",
+    "prod:down": "docker-compose -f docker-compose.prod.yml down",
+    "prod:logs": "docker-compose -f docker-compose.prod.yml logs -f",
+    "deploy:dev": "./scripts/deploy.sh development",
+    "deploy:prod": "./scripts/deploy.sh production",
+    "health:check": "./scripts/health-check.sh",
+    "health:dev": "./scripts/health-check.sh development",
+    "health:prod": "./scripts/health-check.sh production",
+    "seed:db": "node scripts/seed-database.js",
+    "seed:dev": "docker-compose exec api node scripts/seed-database.js",
+    "seed:prod": "docker-compose -f docker-compose.prod.yml exec api node scripts/seed-database.js",
+    "clean": "docker-compose down -v --rmi all",
+    "clean:prod": "docker-compose -f docker-compose.prod.yml down -v --rmi all",
+    "logs:api": "docker-compose logs -f api",
+    "logs:client": "docker-compose logs -f client",
+    "logs:mongodb": "docker-compose logs -f mongodb",
+    "logs:redis": "docker-compose logs -f redis",
+    "status": "docker-compose ps",
+    "status:prod": "docker-compose -f docker-compose.prod.yml ps",
+    "backup": "docker-compose exec mongodb mongodump --out /backup/$(date +%Y%m%d_%H%M%S)",
+    "restore": "docker-compose exec mongodb mongorestore /backup/$2"
+  },
   "dependencies": {
     "mongodb-memory-server": "^10.2.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "helpdesk",
+    "ai",
+    "ticket-management",
+    "automation",
+    "support",
+    "customer-service"
+  ],
+  "author": "Smart Helpdesk Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/smart-helpdesk.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }

@@ -2,3 +2,6 @@
 alwaysApply: true
 ---
 always tell first which model  exactly are you.
+
+
+and if you are claude model make sure to call review gate MCP to get review from user for your task and fix any errors based on review.

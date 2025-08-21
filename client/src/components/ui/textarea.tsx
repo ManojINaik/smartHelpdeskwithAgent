@@ -2,16 +2,20 @@ import * as React from "react"
 import { cn } from "../../lib/utils"
 
 export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  variant?: 'default' | 'modern'
+}
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, variant = 'default', ...props }, ref) => {
+    const variants = {
+      default: "flex min-h-[120px] w-full rounded-lg border-2 border-neutral-200 bg-background px-4 py-3 text-sm font-mulish font-medium transition-all placeholder:text-neutral-400 focus-visible:outline-none focus-visible:border-primary-500 focus-visible:ring-2 focus-visible:ring-primary-500/20 disabled:cursor-not-allowed disabled:opacity-50 resize-none",
+      modern: "flex min-h-[140px] w-full rounded-lg border-2 border-neutral-200 bg-background px-5 py-4 text-base font-mulish font-medium transition-all placeholder:text-neutral-400 focus-visible:outline-none focus-visible:border-primary-500 focus-visible:ring-4 focus-visible:ring-primary-500/10 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+    }
+    
     return (
       <textarea
-        className={cn(
-          "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-          className
-        )}
+        className={cn(variants[variant], className)}
         ref={ref}
         {...props}
       />

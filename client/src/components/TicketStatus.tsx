@@ -1,16 +1,36 @@
 import React from 'react';
 import { TicketStatus as TStatus } from '../store/tickets';
+import { Badge } from './ui/badge';
 
-export const TicketStatus: React.FC<{ status: TStatus } > = ({ status }) => {
-  const color = {
-    open: 'bg-gray-200 text-gray-800',
-    triaged: 'bg-indigo-100 text-indigo-800',
-    waiting_human: 'bg-yellow-100 text-yellow-800',
-    resolved: 'bg-green-100 text-green-800',
-    closed: 'bg-red-100 text-red-800',
-  }[status];
+export const TicketStatus: React.FC<{ status: TStatus }> = ({ status }) => {
+  const getStatusVariant = (ticketStatus: TStatus) => {
+    switch (ticketStatus) {
+      case 'open': 
+        return 'accent';
+      case 'triaged': 
+        return 'default';
+      case 'waiting_human': 
+        return 'warning';
+      case 'resolved': 
+        return 'success';
+      case 'closed': 
+        return 'secondary';
+      default: 
+        return 'secondary';
+    }
+  };
+  
   const label = status.replace('_', ' ');
-  return <span className={`rounded px-2 py-0.5 text-xs font-medium ${color}`}>{label}</span>;
+  
+  return (
+    <Badge 
+      variant={getStatusVariant(status) as any} 
+      size="sm"
+      className="capitalize font-mulish font-bold"
+    >
+      {label}
+    </Badge>
+  );
 };
 
 export default TicketStatus;

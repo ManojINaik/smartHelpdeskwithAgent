@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
+import { ModernCard, GradientCard } from './ui/card';
 import { 
   Shield, 
   MessageSquare, 
@@ -12,175 +12,260 @@ import {
   ArrowRight,
   Star,
   Zap,
-  Globe
+  Globe,
+  Edit,
+  CreditCard,
+  User,
+  FileText
 } from 'lucide-react';
 
 export const LandingHero: React.FC = () => {
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
+    <div className="relative min-h-screen bg-background overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute left-[-195px] top-[712px] w-[936px] h-[936px] bg-background-secondary rounded-full opacity-80" />
+        <div className="absolute right-0 top-0 w-[400px] h-[400px] bg-primary-100 rounded-full opacity-60" />
+      </div>
       
-      <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-8">
         {/* Hero Section */}
-        <div className="text-center">
-          <div className="flex justify-center mb-8">
-            <div className="relative">
-              <div className="p-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full shadow-2xl">
-                <Shield className="h-12 w-12 text-white" />
+        <div className="text-center mb-20">
+          {/* Profile Card - Inspired by design */}
+          <div className="flex justify-center mb-12">
+            <GradientCard className="relative w-96 text-center">
+              {/* Profile Avatar */}
+              <div className="relative mb-6">
+                <div className="w-44 h-44 mx-auto rounded-full bg-warning-400 flex items-center justify-center text-6xl shadow-xl">
+                  🚀
+                </div>
+                <div className="absolute bottom-2 right-20 w-9 h-9 bg-white/20 rounded-full" />
               </div>
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                <CheckCircle className="h-3 w-3 text-white" />
-              </div>
-            </div>
+              
+              <h2 className="text-sm font-mulish font-semibold text-white/90 mb-1">
+                Welcome back
+              </h2>
+              <h1 className="text-2xl font-mulish font-bold text-white mb-6">
+                Smart Helpdesk
+              </h1>
+              
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="bg-white text-primary-800 hover:bg-white/90 rounded-4xl font-mulish font-semibold px-8"
+                asChild
+              >
+                <Link to="/register">
+                  <Edit className="w-4 h-4 mr-2" />
+                  Get Started
+                </Link>
+              </Button>
+            </GradientCard>
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Smart Helpdesk
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-              AI-Powered Support
+          <h1 className="text-5xl md:text-6xl font-mulish font-bold text-primary-800 mb-6 leading-tight">
+            AI-Powered Support
+            <span className="block text-primary-400">
+              Made Simple
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-neutral-400 mb-8 max-w-3xl mx-auto leading-relaxed font-mulish font-medium">
             Transform your customer support with intelligent AI that learns, adapts, and provides instant solutions. 
             Experience the future of helpdesk management.
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button asChild size="lg" className="h-14 px-8 text-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg">
-              <Link to="/register">
-                Get Started Free
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button variant="outline" asChild size="lg" className="h-14 px-8 text-lg">
-              <Link to="/kb">
-                <BookOpen className="mr-2 h-5 w-5" />
-                Browse Knowledge Base
-              </Link>
-            </Button>
-          </div>
-          
-          {/* Trust Indicators */}
-          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <span>4.9/5 from 10,000+ users</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>99.9% Uptime</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-blue-500" />
-              <span>SOC 2 Compliant</span>
-            </div>
-          </div>
         </div>
-        
-        {/* Features Grid */}
-        <div className="mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-            <CardContent className="p-8 text-center">
-              <div className="p-4 bg-indigo-100 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <Zap className="h-8 w-8 text-indigo-600" />
+
+        {/* Features Grid - Modern Card Design */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+          {/* Payment Card Inspired Design */}
+          <ModernCard variant="payment" className="relative">
+            <div className="mb-6">
+              <h3 className="text-lg font-mulish font-bold text-neutral-900 mb-2">
+                Smart Ticketing
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-mulish font-bold text-neutral-400 uppercase tracking-widest mb-2">
+                    PRIORITY LEVEL
+                  </label>
+                  <div className="h-15 w-full rounded-lg border-2 border-primary-500 bg-background flex items-center px-5">
+                    <span className="text-base font-mulish font-bold tracking-widest text-primary-800">
+                      HIGH PRIORITY
+                    </span>
+                    <Shield className="ml-auto w-6 h-6 text-primary-500" />
+                  </div>
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block text-xs font-mulish font-bold text-neutral-400 uppercase tracking-widest mb-2">
+                      STATUS
+                    </label>
+                    <div className="h-15 rounded-lg border-2 border-neutral-200 bg-background flex items-center px-4">
+                      <span className="text-sm font-mulish font-bold text-primary-800">
+                        ACTIVE
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs font-mulish font-bold text-neutral-400 uppercase tracking-widest mb-2">
+                      AGENT
+                    </label>
+                    <div className="h-15 rounded-lg border-2 border-neutral-200 bg-background flex items-center px-4">
+                      <span className="text-sm font-mulish font-bold text-primary-800">
+                        AI BOT
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">AI-Powered Responses</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Get instant, accurate answers with our intelligent AI that learns from your knowledge base and provides contextual responses.
-              </p>
-            </CardContent>
-          </Card>
+              
+              <div className="flex justify-between mt-6">
+                <Button variant="outline" size="lg" className="font-mulish font-bold">
+                  Cancel
+                </Button>
+                <Button variant="default" size="lg" className="font-mulish font-bold">
+                  Create Ticket
+                </Button>
+              </div>
+            </div>
+          </ModernCard>
           
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-            <CardContent className="p-8 text-center">
-              <div className="p-4 bg-green-100 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <Users className="h-8 w-8 text-green-600" />
+          {/* Profile Success Card */}
+          <ModernCard variant="profile">
+            <div className="space-y-6">
+              <div className="flex items-center">
+                <div className="w-9 h-9 rounded-full bg-success-500 flex items-center justify-center mr-4">
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-mulish font-bold text-primary-900">
+                    Knowledge Base
+                  </h3>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">24/7 Support Team</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Our dedicated support team is available around the clock to help you resolve complex issues and provide personalized assistance.
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-            <CardContent className="p-8 text-center">
-              <div className="p-4 bg-purple-100 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <TrendingUp className="h-8 w-8 text-purple-600" />
+              
+              <div className="flex items-center">
+                <div className="w-9 h-9 rounded-full bg-success-500 flex items-center justify-center mr-4">
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-mulish font-bold text-primary-900">
+                    Agent Dashboard
+                  </h3>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Real-time Analytics</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Track performance, monitor trends, and gain insights with comprehensive analytics and reporting tools.
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-            <CardContent className="p-8 text-center">
-              <div className="p-4 bg-blue-100 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <Globe className="h-8 w-8 text-blue-600" />
+              
+              <div className="flex items-center">
+                <div className="w-9 h-9 rounded-full border-2 border-primary-400 flex items-center justify-center mr-4">
+                  <User className="w-5 h-5 text-primary-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-mulish font-bold text-primary-400">
+                    Analytics Setup
+                  </h3>
+                  <p className="text-sm font-mulish font-semibold text-neutral-700">
+                    Configure advanced reporting and insights dashboard
+                  </p>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Multi-language Support</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Serve customers worldwide with built-in multi-language support and localization features.
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-            <CardContent className="p-8 text-center">
-              <div className="p-4 bg-orange-100 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <MessageSquare className="h-8 w-8 text-orange-600" />
+            </div>
+          </ModernCard>
+
+          {/* Success Notification Card */}
+          <ModernCard className="text-center">
+            <div className="mb-6">
+              <div className="w-17 h-17 mx-auto rounded-full bg-success-500 flex items-center justify-center mb-4">
+                <CheckCircle className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Smart Ticket Routing</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Automatically route tickets to the right agents based on expertise, workload, and priority.
+              <h2 className="text-2xl font-mulish font-bold text-neutral-900 mb-2">
+                Setup Complete
+              </h2>
+              <p className="text-base font-mulish font-semibold text-neutral-400">
+                Your helpdesk is ready to serve customers
               </p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-            <CardContent className="p-8 text-center">
-              <div className="p-4 bg-red-100 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <Shield className="h-8 w-8 text-red-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Enterprise Security</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Bank-level security with end-to-end encryption, SSO integration, and compliance certifications.
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+          </ModernCard>
         </div>
-        
+
+        {/* Analytics Section - Chart Inspired */}
+        <div className="mb-20">
+          <ModernCard className="">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="text-5xl font-mulish font-bold text-primary-600 mb-2">
+                  $58,092.10
+                </h2>
+                <p className="text-sm font-mulish font-bold text-success-light">
+                  +530.21% over the past quarter
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-primary-900">
+                <span className="font-mulish font-bold">Analytics</span>
+                <ArrowRight className="w-5 h-5 rotate-90" />
+              </div>
+            </div>
+            
+            {/* Chart Area Simulation */}
+            <div className="relative h-48 mb-6">
+              <div className="absolute inset-0 bg-gradient-to-t from-primary-500/20 to-transparent rounded-lg" />
+              <div className="absolute bottom-0 left-0 right-0 h-24 border-t-2 border-primary-500 rounded-lg" />
+              <div className="absolute left-1/2 top-12 w-0.5 h-24 border-l-2 border-dashed border-primary-600" />
+              <div className="absolute left-1/2 top-20 w-3 h-3 bg-white border-2 border-primary-600 rounded-full" />
+            </div>
+            
+            <div className="grid grid-cols-3 gap-8 text-center">
+              <div>
+                <p className="text-sm font-mulish font-bold text-neutral-600 mb-1">Jan</p>
+                <p className="text-base font-mulish font-bold text-neutral-800">$30,000</p>
+              </div>
+              <div>
+                <p className="text-sm font-mulish font-bold text-neutral-600 mb-1">Feb</p>
+                <p className="text-base font-mulish font-bold text-neutral-800">$40,000</p>
+              </div>
+              <div>
+                <p className="text-sm font-mulish font-bold text-neutral-600 mb-1">Mar</p>
+                <p className="text-base font-mulish font-bold text-neutral-800">$50,000</p>
+              </div>
+            </div>
+          </ModernCard>
+        </div>
+
         {/* CTA Section */}
-        <div className="mt-24 text-center">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-12 text-white">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+        <div className="text-center">
+          <GradientCard className="text-center">
+            <h2 className="text-4xl font-mulish font-bold text-white mb-6">
               Ready to Transform Your Support?
             </h2>
-            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-              Join thousands of companies that have revolutionized their customer support with Smart Helpdesk.
+            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto font-mulish font-medium">
+              Join thousands of companies that have revolutionized their customer support.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" variant="secondary" className="h-12 px-8 text-lg">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Button 
+                asChild 
+                size="xl" 
+                variant="secondary" 
+                className="bg-white text-primary-800 hover:bg-white/90 font-mulish font-bold"
+              >
                 <Link to="/register">
                   Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-12 px-8 text-lg border-white text-white hover:bg-white hover:text-indigo-600">
+              <Button 
+                asChild 
+                size="xl" 
+                variant="outline" 
+                className="border-2 border-white text-white hover:bg-white hover:text-primary-600 font-mulish font-bold"
+              >
                 <Link to="/login">
                   Sign In
                 </Link>
               </Button>
             </div>
-          </div>
+          </GradientCard>
         </div>
       </div>
     </div>
