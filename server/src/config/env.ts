@@ -1,4 +1,8 @@
+import dotenv from 'dotenv';
 import { z } from 'zod';
+
+// Ensure .env is loaded before any consumer calls validateEnv/getEnvConfig
+dotenv.config();
 
 // Environment variables schema
 const envSchema = z.object({

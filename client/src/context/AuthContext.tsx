@@ -15,8 +15,8 @@ interface AuthContextValue {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (name: string, email: string, password: string) => Promise<User>;
   logout: () => void;
 }
 
@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const resp = await api.get('/api/auth/me');
         setUser(resp.data.user);
-        wsClient.connect(resp.data.user.id);
+        wsClient.connect(resp.data.user.id ?? resp.data.user.sub);
       } catch {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -59,6 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('refreshToken', resp.data.refreshToken);
       setToken(resp.data.accessToken);
       setUser(resp.data.user);
+      return resp.data.user as User;
     },
     async register(name, email, password) {
       const resp = await api.post('/api/auth/register', { name, email, password });
@@ -66,6 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('refreshToken', resp.data.refreshToken);
       setToken(resp.data.accessToken);
       setUser(resp.data.user);
+      return resp.data.user as User;
     },
     logout() {
       localStorage.removeItem('accessToken');

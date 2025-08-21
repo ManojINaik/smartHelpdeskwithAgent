@@ -17,8 +17,11 @@ export const Login: React.FC = () => {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormValues) => {
-    await login(data.email, data.password);
-    navigate('/');
+    const u = await login(data.email, data.password);
+    // Role-based landing
+    if (u.role === 'admin') navigate('/admin/metrics');
+    else if (u.role === 'agent') navigate('/agent');
+    else navigate('/');
   };
 
   return (
@@ -47,5 +50,6 @@ export const Login: React.FC = () => {
 };
 
 export default Login;
+
 
 

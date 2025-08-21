@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import api from '../lib/api';
+import AdminLayout from '../components/AdminLayout';
 
 export const AdminMetrics: React.FC = () => {
   const [data, setData] = useState<any>(null);
@@ -8,29 +9,29 @@ export const AdminMetrics: React.FC = () => {
     setData(res.data);
   })(); }, []);
 
-  if (!data) return <div className="p-4 text-gray-600">Loading...</div>;
+  if (!data) return <AdminLayout title="System Metrics"><div className="p-2 text-gray-600">Loading...</div></AdminLayout>;
+
+  const cards = useMemo(() => ([
+    { title: 'Tickets by Status', content: data.tickets },
+    { title: 'Suggestion Performance', content: data.suggestions },
+    { title: 'Users by Role', content: data.users }
+  ]), [data]);
 
   return (
-    <div className="mx-auto max-w-5xl p-4">
-      <h2 className="mb-4 text-xl font-semibold">System Metrics</h2>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="rounded border p-3">
-          <h3 className="mb-1 font-medium">Tickets by Status</h3>
-          <pre className="overflow-auto text-xs">{JSON.stringify(data.tickets, null, 2)}</pre>
-        </div>
-        <div className="rounded border p-3">
-          <h3 className="mb-1 font-medium">Suggestion Performance</h3>
-          <pre className="overflow-auto text-xs">{JSON.stringify(data.suggestions, null, 2)}</pre>
-        </div>
-        <div className="rounded border p-3">
-          <h3 className="mb-1 font-medium">Users by Role</h3>
-          <pre className="overflow-auto text-xs">{JSON.stringify(data.users, null, 2)}</pre>
-        </div>
+    <AdminLayout title="System Metrics">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {cards.map(card => (
+          <section key={card.title} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+            <h3 className="mb-2 text-sm font-semibold text-gray-800">{card.title}</h3>
+            <pre className="max-h-72 overflow-auto rounded bg-gray-50 p-3 text-xs text-gray-800">{JSON.stringify(card.content, null, 2)}</pre>
+          </section>
+        ))}
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
 export default AdminMetrics;
+
 
 

@@ -18,8 +18,10 @@ export const Register: React.FC = () => {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormValues) => {
-    await doRegister(data.name, data.email, data.password);
-    navigate('/');
+    const u = await doRegister(data.name, data.email, data.password);
+    if (u.role === 'admin') navigate('/admin/metrics');
+    else if (u.role === 'agent') navigate('/agent');
+    else navigate('/');
   };
 
   return (
@@ -53,5 +55,6 @@ export const Register: React.FC = () => {
 };
 
 export default Register;
+
 
 

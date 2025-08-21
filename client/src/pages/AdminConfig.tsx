@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
+import AdminLayout from '../components/AdminLayout';
 
 export const AdminConfig: React.FC = () => {
   const [config, setConfig] = useState<any>(null);
@@ -17,12 +18,11 @@ export const AdminConfig: React.FC = () => {
     setMessage('Saved');
   };
 
-  if (!config) return <div className="p-4 text-gray-600">Loading...</div>;
+  if (!config) return <AdminLayout title="System Settings"><div className="p-2 text-gray-600">Loading...</div></AdminLayout>;
 
   return (
-    <div className="mx-auto max-w-3xl p-4">
-      <h2 className="mb-4 text-xl font-semibold">System Settings</h2>
-      {message && <div className="mb-3 text-sm text-green-700">{message}</div>}
+    <AdminLayout title="System Settings">
+      {message && <div className="mb-3 rounded-md bg-green-50 p-3 text-sm text-green-700">{message}</div>}
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">Auto Close Enabled</label>
@@ -44,12 +44,13 @@ export const AdminConfig: React.FC = () => {
           <label className="block text-sm font-medium text-gray-700">Allowed Attachment Types (comma)</label>
           <input className="mt-1 w-full rounded border px-3 py-2" value={config.allowedAttachmentTypes.join(',')} onChange={e => setConfig({ ...config, allowedAttachmentTypes: e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean) })} />
         </div>
-        <button className="rounded bg-blue-600 px-4 py-2 text-white" onClick={save}>Save</button>
+        <button className="rounded bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700" onClick={save}>Save</button>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
 export default AdminConfig;
+
 
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
+import AdminLayout from '../components/AdminLayout';
 
 export const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -16,13 +17,12 @@ export const AdminUsers: React.FC = () => {
     setUsers(u => u.map(x => x._id === id ? { ...x, role } : x));
   };
 
-  if (loading) return <div className="p-4 text-gray-600">Loading...</div>;
+  if (loading) return <AdminLayout title="Users"><div className="p-2 text-gray-600">Loading...</div></AdminLayout>;
   return (
-    <div className="mx-auto max-w-4xl p-4">
-      <h2 className="mb-4 text-xl font-semibold">Users</h2>
-      <table className="w-full table-fixed border text-sm">
+    <AdminLayout title="Users">
+      <table className="w-full table-fixed border-separate border-spacing-0 overflow-hidden rounded-lg text-sm shadow-sm">
         <thead>
-          <tr className="bg-gray-100">
+          <tr className="bg-gray-50 text-gray-700">
             <th className="p-2 text-left">Name</th>
             <th className="p-2 text-left">Email</th>
             <th className="p-2 text-left">Role</th>
@@ -31,7 +31,7 @@ export const AdminUsers: React.FC = () => {
         </thead>
         <tbody>
           {users.map(u => (
-            <tr key={u._id} className="border-t">
+            <tr key={u._id} className="border-t last:border-b">
               <td className="p-2">{u.name}</td>
               <td className="p-2">{u.email}</td>
               <td className="p-2">{u.role}</td>
@@ -46,10 +46,11 @@ export const AdminUsers: React.FC = () => {
           ))}
         </tbody>
       </table>
-    </div>
+    </AdminLayout>
   );
 };
 
 export default AdminUsers;
+
 
 
