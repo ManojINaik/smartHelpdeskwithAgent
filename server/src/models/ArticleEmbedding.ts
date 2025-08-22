@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Document, Model } from 'mongoose';
 import { BaseDocument } from '../types/models.js';
 import { getAtlasConfig } from '../config/atlas.js';
 
@@ -20,7 +20,7 @@ export interface IArticleEmbedding extends BaseDocument {
 }
 
 // Extend the model interface to include static methods
-interface IArticleEmbeddingModel extends mongoose.Model<IArticleEmbedding> {
+export interface IArticleEmbeddingModel extends Model<IArticleEmbedding> {
   findSimilar(queryEmbedding: number[], limit?: number, threshold?: number): Promise<Array<{
     embedding: any;
     similarity: number;
@@ -153,6 +153,37 @@ articleEmbeddingSchema.methods.cosineSimilarity = function(otherEmbedding: numbe
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 };
 
+// Method to find similar embeddings using cosine similarity
+articleEmbeddingSchema.statics.findSimilar = async function(
+  queryEmbedding: number[],
+  limit: number = 5,
+  threshold: number = 0.1
+) {
+  const embeddings = await this.find().populate('articleId');
+  const similarities: Array<{
+    embedding: any;
+    similarity: number;
+    article: any;
+  }> = [];
+
+  for (const embedding of embeddings) {
+    if (embedding.articleId && embedding.articleId.status === 'published') {
+      const similarity = embedding.cosineSimilarity(queryEmbedding);
+      if (similarity >= threshold) {
+        similarities.push({
+          embedding,
+          similarity,
+          article: embedding.articleId
+        });
+      }
+    }
+  }
+
+  return similarities
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, limit);
+};
+
 // Static method for Atlas Vector Search
 articleEmbeddingSchema.statics.vectorSearch = async function(
   queryEmbedding: number[], 
@@ -167,7 +198,7 @@ articleEmbeddingSchema.statics.vectorSearch = async function(
   
   if (!atlasConfig.enabled) {
     console.warn('Atlas Vector Search is disabled, falling back to similarity search');
-    return await this.findSimilar(queryEmbedding, limit, threshold);
+    return await (this as IArticleEmbeddingModel).findSimilar(queryEmbedding, limit, threshold);
   }
 
   try {
@@ -238,7 +269,7 @@ articleEmbeddingSchema.statics.vectorSearch = async function(
   } catch (error: any) {
     console.warn('Atlas Vector Search failed, falling back to similarity search:', error.message);
     // Fallback to existing similarity search
-    return await this.findSimilar(queryEmbedding, limit, Math.max(threshold, atlasConfig.scoreThreshold));
+    return await (this as IArticleEmbeddingModel).findSimilar(queryEmbedding, limit, Math.max(threshold, atlasConfig.scoreThreshold));
   }
 };
 
@@ -247,37 +278,6 @@ articleEmbeddingSchema.pre('save', function(next) {
   this.lastUpdated = new Date();
   next();
 });
-
-// Method to find similar embeddings using cosine similarity
-articleEmbeddingSchema.statics.findSimilar = async function(
-  queryEmbedding: number[],
-  limit: number = 5,
-  threshold: number = 0.1
-) {
-  const embeddings = await this.find().populate('articleId');
-  const similarities: Array<{
-    embedding: any;
-    similarity: number;
-    article: any;
-  }> = [];
-
-  for (const embedding of embeddings) {
-    if (embedding.articleId && embedding.articleId.status === 'published') {
-      const similarity = embedding.cosineSimilarity(queryEmbedding);
-      if (similarity >= threshold) {
-        similarities.push({
-          embedding,
-          similarity,
-          article: embedding.articleId
-        });
-      }
-    }
-  }
-
-  return similarities
-    .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, limit);
-};
 
 // Method to check if Atlas Vector Search is available
 articleEmbeddingSchema.statics.isAtlasVectorSearchAvailable = async function() {
@@ -320,7 +320,7 @@ articleEmbeddingSchema.statics.getVectorSearchStats = async function() {
     })
   ]);
   
-  const atlasAvailable = await this.isAtlasVectorSearchAvailable();
+  const atlasAvailable = await (this as IArticleEmbeddingModel).isAtlasVectorSearchAvailable();
   
   return {
     totalEmbeddings: total,
@@ -351,7 +351,7 @@ articleEmbeddingSchema.statics.hybridSearch = async function(
     console.warn('Atlas Vector Search is disabled, falling back to legacy hybrid search');
     // Fallback to combining vector and text search results
     const [vectorResults, textResults] = await Promise.all([
-      this.findSimilar(queryEmbedding, Math.ceil(limit * vectorWeight)),
+      (this as IArticleEmbeddingModel).findSimilar(queryEmbedding, Math.ceil(limit * vectorWeight)),
       this.find(
         { $text: { $search: textQuery } },
         { score: { $meta: 'textScore' } }
@@ -474,9 +474,11 @@ articleEmbeddingSchema.statics.hybridSearch = async function(
     }));
   } catch (error: any) {
     console.warn('Atlas Hybrid Search failed, falling back to vector search:', error.message);
-    return await this.vectorSearch(queryEmbedding, limit);
+    return await (this as IArticleEmbeddingModel).vectorSearch(queryEmbedding, limit);
   }
 };
 
-export const ArticleEmbedding = model<IArticleEmbedding, IArticleEmbeddingModel>('ArticleEmbedding', articleEmbeddingSchema);
-export default ArticleEmbedding;
+const ArticleEmbeddingModel = model<IArticleEmbedding, IArticleEmbeddingModel>('ArticleEmbedding', articleEmbeddingSchema);
+
+export const ArticleEmbedding = ArticleEmbeddingModel;
+export default ArticleEmbeddingModel;

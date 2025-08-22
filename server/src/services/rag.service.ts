@@ -77,7 +77,7 @@ export class RAGService {
     }
     
     this.atlasCheckTime = now;
-    return this.atlasAvailable;
+    return this.atlasAvailable ?? false;
   }
   
   /**
@@ -438,7 +438,7 @@ export class RAGService {
     const content = `${article.title}\n\n${article.body}`;
     
     // Check if embedding already exists and is recent
-    const existingEmbedding = await ArticleEmbedding.findOne({ articleId });
+    const existingEmbedding = await (ArticleEmbedding as any).findOne({ articleId });
     const articleUpdated = article.updatedAt;
     
     if (existingEmbedding && existingEmbedding.lastUpdated >= articleUpdated) {
@@ -474,7 +474,7 @@ export class RAGService {
     }
     
     // Save or update embedding with Atlas metadata
-    await ArticleEmbedding.findOneAndUpdate(
+    await (ArticleEmbedding as any).findOneAndUpdate(
       { articleId },
       {
         articleId,
@@ -494,7 +494,7 @@ export class RAGService {
    * Delete embedding for an article
    */
   async deleteEmbeddingForArticle(articleId: string): Promise<void> {
-    await ArticleEmbedding.findOneAndDelete({ articleId });
+    await (ArticleEmbedding as any).findOneAndDelete({ articleId });
   }
   
   /**
@@ -509,17 +509,17 @@ export class RAGService {
   }> {
     const [totalArticles, totalEmbeddings, articles] = await Promise.all([
       Article.countDocuments({ status: 'published' }),
-      ArticleEmbedding.countDocuments(),
+      (ArticleEmbedding as any).countDocuments(),
       Article.find({ status: 'published' }, 'updatedAt')
     ]);
     
-    const embeddings = await ArticleEmbedding.find({}, 'articleId lastUpdated');
+    const embeddings = await (ArticleEmbedding as any).find({}, 'articleId lastUpdated');
     
     let embeddingsNeedingUpdate = 0;
     let totalAge = 0;
     
     for (const article of articles) {
-      const embedding = embeddings.find(e => String(e.articleId) === String(article._id));
+      const embedding = embeddings.find((e: any) => String(e.articleId) === String(article._id));
       
       if (!embedding) {
         embeddingsNeedingUpdate++;

@@ -247,7 +247,7 @@ export class AtlasRAGService {
    * Perform Atlas Text Search
    */
   private async performAtlasTextSearch(query: string, limit: number): Promise<any[]> {
-    const results = await ArticleEmbedding.find(
+    const results = await (ArticleEmbedding as any).find(
       { $text: { $search: query } },
       { score: { $meta: 'textScore' } }
     )
@@ -257,8 +257,8 @@ export class AtlasRAGService {
     .lean();
 
     return results
-      .filter(result => result.articleId) // Ensure article exists
-      .map(result => ({
+      .filter((result: any) => result.articleId) // Ensure article exists
+      .map((result: any) => ({
         embedding: result,
         article: result.articleId,
         similarity: (result as any).score || 0.5,
@@ -417,7 +417,7 @@ export class AtlasRAGService {
       }
 
       // Save or update embedding with Atlas metadata
-      await ArticleEmbedding.findOneAndUpdate(
+      await (ArticleEmbedding as any).findOneAndUpdate(
         { articleId },
         {
           articleId,

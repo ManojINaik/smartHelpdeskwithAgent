@@ -5,6 +5,11 @@ import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = Router();
 
+// Test route to verify KB routes are working
+router.get('/test', (req, res) => {
+  res.json({ message: 'KB routes are working!', timestamp: new Date().toISOString() });
+});
+
 // Search KB (public or authenticated user)
 router.get('/articles', async (req, res) => {
   const query = String(req.query.search || '').trim();
@@ -19,20 +24,19 @@ router.get('/', async (req, res) => {
   res.json({ results });
 });
 
-// Get all articles - admin can see drafts, others see published only
-router.get('/articles/all', async (req, res) => {
+// Legacy endpoint for backward compatibility - MUST be before /:id route
+router.get('/all', async (req, res) => {
   try {
-    const isAdmin = req.user?.role === 'admin';
-    const includeUnpublished = isAdmin;
-    const results = await KnowledgeBaseService.getAllArticles(includeUnpublished);
+    // Return only published articles for public access
+    const results = await KnowledgeBaseService.getAllArticles(false);
     res.json({ results });
   } catch (err: any) {
     res.status(500).json({ error: { code: 'KB_LIST_FAILED', message: err.message } });
   }
 });
 
-// Legacy endpoint for backward compatibility
-router.get('/all', async (req, res) => {
+// Get all articles - admin can see drafts, others see published only
+router.get('/articles/all', authenticate, async (req, res) => {
   try {
     const isAdmin = req.user?.role === 'admin';
     const includeUnpublished = isAdmin;

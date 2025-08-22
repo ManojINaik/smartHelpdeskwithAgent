@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
@@ -31,6 +31,7 @@ import {
   Send,
   CheckCircle,
   AlertCircle,
+  AlertTriangle,
   Info,
   History,
   Eye,
@@ -182,7 +183,9 @@ export const TicketDetail: React.FC = () => {
       case 'AUTO_CLOSED':
         return 'Automatically resolved by AI';
       case 'STATUS_CHANGED':
-        return `Status changed to ${log.meta?.newStatus || 'unknown'}`;
+        return `Status changed to ${log.meta?.status || log.meta?.newStatus || 'unknown'}`;
+      case 'MANUAL_ESCALATION':
+        return `Manually escalated${log.meta?.reason ? ` - ${log.meta.reason}` : ''}`;
       case 'REPLY_ADDED':
         return 'New reply was added';
       case 'TICKET_ASSIGNED':
@@ -207,6 +210,8 @@ export const TicketDetail: React.FC = () => {
       case 'AUTO_CLOSED':
       case 'STATUS_CHANGED':
         return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'MANUAL_ESCALATION':
+        return <AlertTriangle className="h-4 w-4 text-orange-600" />;
       case 'REPLY_ADDED':
         return <MessageSquare className="h-4 w-4 text-blue-600" />;
       default:
