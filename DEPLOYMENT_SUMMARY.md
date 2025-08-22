@@ -23,19 +23,26 @@ This document summarizes the implementation of Task 21: Deployment and DevOps Se
 - Load balancing and caching
 - Rate limiting and security headers
 
-### 2. Database Seed Scripts with Sample Data
+### 2. Auto-Seeding System with Sample Data
 
 **Files Created:**
-- `scripts/seed-database.js` - Comprehensive database seeding script
+- `server/src/services/autoSeed.service.ts` - Intelligent auto-seeding service
+- `scripts/seed-database.js` - Manual seeding script (legacy)
 
-**Features Implemented:**
-- Sample users (admin, agents, customers)
-- Sample knowledge base articles
-- Sample tickets with various statuses
-- Sample configurations and audit logs
-- Configurable sample data size
-- Proper relationships between entities
-- Default login credentials
+**Auto-Seeding Features:**
+- **One-time initialization:** Only runs when database is empty
+- **Smart detection:** Checks user count to determine seeding necessity
+- **Complete setup:** Creates users, knowledge base articles, and system configuration
+- **Environment controlled:** Enabled via `AUTO_SEED=true` environment variable
+- **Production ready:** Can be disabled for production deployments
+
+**Data Created:**
+- 1 admin user (`admin@smarthelpdesk.com`)
+- 2 agent users (`john.agent@`, `sarah.agent@smarthelpdesk.com`)
+- 2 customer users (`mike.customer@`, `lisa.customer@example.com`)
+- 5 knowledge base articles (password reset, billing FAQ, API guide, etc.)
+- Default system configuration (SLA, thresholds, notifications)
+- Proper relationships between entities with secure password hashing
 
 ### 3. Health Check Endpoints for All Services
 
@@ -104,11 +111,13 @@ This document summarizes the implementation of Task 21: Deployment and DevOps Se
   "deploy:dev": "./scripts/deploy.sh development",
   "deploy:prod": "./scripts/deploy.sh production",
   "health:check": "./scripts/health-check.sh",
-  "seed:db": "node scripts/seed-database.js",
+  "fresh:start": "docker-compose down -v && docker-compose up --build",
   "backup": "docker-compose exec mongodb mongodump --out /backup/$(date +%Y%m%d_%H%M%S)",
   "restore": "docker-compose exec mongodb mongorestore /backup/$2"
 }
 ```
+
+**Note:** Auto-seeding happens automatically on first startup. Use `fresh:start` to trigger re-seeding by clearing data.
 
 ## 🔧 Key Features Implemented
 
@@ -186,11 +195,15 @@ npm run health:check
                     └─────────────────┘    └─────────────────┘
 ```
 
-## 🔑 Default Credentials
+## 🔑 Auto-Generated Default Credentials
 
 - **Admin**: admin@smarthelpdesk.com / admin123
-- **Agent**: john.agent@smarthelpdesk.com / agent123
-- **User**: mike.customer@example.com / user123
+- **Agent 1**: john.agent@smarthelpdesk.com / agent123
+- **Agent 2**: sarah.agent@smarthelpdesk.com / agent123
+- **Customer 1**: mike.customer@example.com / user123
+- **Customer 2**: lisa.customer@example.com / user123
+
+**Note:** These accounts are auto-created during first startup via the intelligent seeding system.
 
 ## 📝 Requirements Fulfilled
 

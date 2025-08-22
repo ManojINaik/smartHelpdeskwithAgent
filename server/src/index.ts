@@ -112,6 +112,10 @@ async function bootstrap() {
     // Ensure database is connected before accepting requests
     await dbConnection.connect();
 
+    // Auto-seed database if empty (only on first setup)
+    const { default: AutoSeedService } = await import('./services/autoSeed.service.js');
+    await AutoSeedService.seedIfEmpty();
+
     const server = app.listen(PORT, () => {
       console.log(`🚀 Smart Helpdesk API server running on port ${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);

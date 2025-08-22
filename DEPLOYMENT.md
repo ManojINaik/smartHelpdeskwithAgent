@@ -68,7 +68,9 @@ chmod +x scripts/deploy.sh
 
 - **Frontend**: http://localhost:5173 (development) or http://localhost:80 (production)
 - **API**: http://localhost:3000
-- **Default Admin**: admin@smarthelpdesk.com / admin123
+- **Auto-Generated Admin**: admin@smarthelpdesk.com / admin123
+
+**🌱 Auto-Seeding:** The system automatically creates default users, knowledge base articles, and configuration on first startup when the database is empty.
 
 ## Environment Configuration
 
@@ -107,6 +109,20 @@ CORS_ORIGIN=https://yourdomain.com
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=100
 ```
+
+#### Auto-Seeding Configuration
+
+```bash
+# Auto-seed database with default users and knowledge base (first startup only)
+AUTO_SEED=true  # Set to false for production if you want manual user creation
+```
+
+**Auto-Seeding Details:**
+- **Development**: Enabled by default (`AUTO_SEED=true`)
+- **Production**: Consider setting `AUTO_SEED=false` for manual control
+- **One-time only**: Seeds database only when empty (no users exist)
+- **Creates**: 1 admin, 2 agents, 2 customers + 5 KB articles + system config
+- **Security**: Change default passwords immediately after first login
 
 ### Environment-Specific Files
 
@@ -217,17 +233,29 @@ deploy:
 
 ### Initial Setup
 
-The system automatically creates the database schema and indexes on first run.
+The system automatically:
+1. **Creates database schema** and indexes on first run
+2. **Auto-seeds database** with default users, knowledge base articles, and configuration (when `AUTO_SEED=true`)
 
-### Seeding Sample Data
+### Auto-Seeding System
+
+The system includes an intelligent auto-seeding mechanism:
 
 ```bash
-# Seed database with sample data (development only)
-docker-compose exec api node scripts/seed-database.js
+# Auto-seeding runs automatically on first API startup when database is empty
+# Check seeding status in logs:
+docker logs smart-helpdesk-api | grep "auto-seeding"
 
-# Or run the seed script directly
-node scripts/seed-database.js
+# To trigger fresh seeding (clears all data):
+docker compose down -v && docker compose up --build
 ```
+
+**What gets auto-created:**
+- **Users**: 1 admin, 2 agents, 2 customers with secure passwords
+- **Knowledge Base**: 5 helpful articles (password reset, billing FAQ, API guide, etc.)
+- **Configuration**: Default SLA settings, thresholds, and notifications
+
+**Production Note**: Consider setting `AUTO_SEED=false` in production for manual user management.
 
 ### Backup and Restore
 

@@ -32,31 +32,39 @@ Then open http://localhost:5173 in your browser!
 
 ### Default Login Accounts (Auto-Created)
 
-**🔐 Automatic User Initialization**
+**🔐 Automatic Database Initialization**
 
-When you first start the MongoDB container, 4 users are automatically created with predefined roles and permissions:
+When you first start the application, if the database is empty, the system automatically seeds it with default users, knowledge base articles, and configuration:
 
 | Role | Name | Email | Password | Access Level |
 |------|------|-------|----------|-------------|
 | Admin | Admin User | `admin@smarthelpdesk.com` | `admin123` | Full system access, user management, configuration |
 | Agent | John Agent | `john.agent@smarthelpdesk.com` | `agent123` | Ticket management, knowledge base |
+| Agent | Sarah Agent | `sarah.agent@smarthelpdesk.com` | `agent123` | Ticket management, knowledge base |
 | Customer | Mike Customer | `mike.customer@example.com` | `user123` | Create tickets, view own tickets |
-| Customer | John Customer | `john.customer@example.com` | `user456` | Create tickets, view own tickets |
+| Customer | Lisa Customer | `lisa.customer@example.com` | `user123` | Create tickets, view own tickets |
 
 **⚠️ Security Note:** These are development credentials. **Change passwords immediately in production!**
 
-**How it works:**
-- Users are created automatically during first MongoDB container startup
-- Initialization happens only once (won't recreate on restart)
-- Controlled by `./scripts/mongo-init.js` script
-- See [User Initialization Guide](./docs/MONGODB_USER_INITIALIZATION.md) for detailed documentation
+**How Auto-Seeding works:**
+- ✅ **One-time only:** Seeds database only when empty (first deployment)
+- ✅ **Smart detection:** Checks user count to determine if seeding is needed
+- ✅ **Complete setup:** Creates users, knowledge base articles, and system configuration
+- ✅ **Environment controlled:** Enabled via `AUTO_SEED=true` (default in development)
+- ✅ **Production ready:** Can be disabled for production deployments
+- 📖 **Detailed docs:** See [Auto-Seeding Documentation](./docs/AUTO_SEEDING.md)
+
+**What gets created:**
+- **5 Users:** 1 admin, 2 agents, 2 customers with secure hashed passwords
+- **5 Knowledge Base Articles:** Password reset, billing FAQ, API guide, system maintenance, getting started
+- **System Configuration:** Default settings for auto-close, SLA, notifications
 
 ### Quick Commands
 ```bash
 # Start everything
 docker compose up
 
-# Fresh restart (clears data)
+# Fresh restart (clears data, triggers auto-seeding)
 docker compose down -v && docker compose up --build
 
 # View logs
@@ -65,12 +73,8 @@ docker compose logs -f
 # Stop everything
 docker compose down
 
-# Test user initialization (optional)
-./scripts/test-user-init.sh    # Linux/Mac
-.\scripts\test-user-init.bat   # Windows
-
-# Reset users (development only)
-node scripts/reset-users.js
+# Check auto-seeding status
+docker logs smart-helpdesk-api | grep "auto-seeding"
 ```
 
 ## 🛠 Detailed Setup Guide for Beginners
@@ -122,7 +126,7 @@ node scripts/reset-users.js
    - Sets up BullMQ for job processing
    - Builds and starts the backend API server
    - Builds and starts the frontend web application
-   - Automatically seeds the database with sample data
+   - **Automatically seeds the database** with users, knowledge base articles, and configuration
 
 3. **Wait for completion** (2-5 minutes first time):
    - You'll see lots of text scrolling
@@ -339,12 +343,24 @@ ATLAS_VECTOR_SEARCH_TIMEOUT=5000
 
 ### Sample Data Configuration
 ```bash
-# Customize sample data size
-SAMPLE_DATA_SIZE=100  # Default: 50
+# Auto-seed database on first startup (development)
+AUTO_SEED=true  # Default: true in development
 
-# Auto-seed on API startup
-AUTO_SEED=true  # Default: true
+# Customize sample data size (if manual seeding)
+SAMPLE_DATA_SIZE=100  # Default: 50
 ```
+
+**Auto-Seeding Details:**
+- **Purpose:** Automatically creates users, knowledge base articles, and configuration when database is empty
+- **Trigger:** Only runs during first deployment when no users exist
+- **Content Created:**
+  - 1 Admin user (`admin@smarthelpdesk.com`)
+  - 2 Agent users (`john.agent@`, `sarah.agent@smarthelpdesk.com`)
+  - 2 Customer users (`mike.customer@`, `lisa.customer@example.com`)
+  - 5 Knowledge base articles (password reset, billing, API guide, etc.)
+  - Default system configuration (SLA, thresholds, notifications)
+- **Production:** Set `AUTO_SEED=false` for production deployments
+- **Development:** Enabled by default for quick setup
 
 ## 🐛 Troubleshooting
 
@@ -415,13 +431,25 @@ AUTO_SEED=true  # Default: true
 
 ## 📚 Default Login Credentials
 
-After startup, you can login with these default accounts:
+After startup, you can login with these auto-generated accounts:
 
 | Role | Email | Password | Access Level |
 |------|-------|----------|-------------|
 | **Admin** | `admin@smarthelpdesk.com` | `admin123` | Full system access, user management, configuration |
 | **Agent** | `john.agent@smarthelpdesk.com` | `agent123` | Ticket management, knowledge base |
+| **Agent** | `sarah.agent@smarthelpdesk.com` | `agent123` | Ticket management, knowledge base |
 | **Customer** | `mike.customer@example.com` | `user123` | Create tickets, view own tickets |
+| **Customer** | `lisa.customer@example.com` | `user123` | Create tickets, view own tickets |
+
+**Note:** These accounts are created automatically during first startup via the auto-seeding system.
+
+## 📖 Documentation
+
+- **[Deployment Guide](./DEPLOYMENT.md)** - Complete deployment instructions
+- **[Deployment Summary](./DEPLOYMENT_SUMMARY.md)** - Quick deployment overview
+- **[Auto-Seeding System](./docs/AUTO_SEEDING.md)** - Database initialization documentation
+- **[AI Response Improvements](./ai-response-improvements.md)** - AI system enhancements
+- **[Testing Guides](./test-auto-triage.md)** - Testing procedures and validation
 
 ## 🔒 Security Notes
 
@@ -434,14 +462,15 @@ After startup, you can login with these default accounts:
 ## 🆕 Recent Updates & Improvements
 
 ### Latest Features (August 2025)
-- **✅ Fixed Status Display Issue:** Resolved "Status changed to unknown" bug in activity timeline
+- **🌱 Auto-Seeding System:** One-time database initialization with users, knowledge base, and configuration
+- **✅ Fixed Docker Health Checks:** Containers now properly report healthy status
+- **📋 Knowledge Base Fixed:** Resolved KB loading issues and route compilation
 - **🔍 Enhanced Vector Search:** MongoDB Atlas Vector Search integration with automatic fallback
 - **📄 Improved Audit Logging:** Comprehensive activity tracking with 90-day retention
 - **🤖 Advanced RAG System:** Retrieval-Augmented Generation for smarter AI responses
 - **🔄 Workflow Orchestration:** 6-step intelligent triage process with error handling
 - **📋 Modern UI Updates:** Enhanced design system with Mulish font and improved layouts
 - **🔐 Enhanced Security:** Improved authentication and role-based access controls
-- **🛮 Deletion Management:** Proper authorization for ticket deletion with audit trails
 
 ### Performance Improvements
 - **Faster Search:** Vector search provides 50-100ms response times on Atlas M10+

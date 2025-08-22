@@ -47,6 +47,7 @@ const envSchema = z.object({
   ALLOWED_FILE_TYPES: z.string().default('.txt,.md,.pdf,.doc,.docx'),
   
   // System Configuration
+  AUTO_SEED: z.string().transform(val => val === 'true').default('false'),
   AUTO_CLOSE_ENABLED: z.string().transform(val => val === 'true').default('true'),
   CONFIDENCE_THRESHOLD: z.string().transform(Number).default('0.8'),
   LOW_CONFIDENCE_THRESHOLD: z.string().transform(Number).default('0.5'),
