@@ -9,8 +9,8 @@ An intelligent customer support system that combines AI-powered automation with 
 **For experienced users:**
 ```bash
 # Clone and start everything
-git clone <repository-url>
-cd smart-helpdesk
+git clone https://github.com/ManojINaik/smartHelpdeskwithAgent/
+cd smartHelpdeskwithAgent
 docker compose up --build
 ```
 
@@ -52,8 +52,8 @@ Then open http://localhost:5173 in your browser!
 
 3. **Clone the project:**
    ```bash
-   git clone <repository-url>
-   cd smart-helpdesk
+   git clone https://github.com/ManojINaik/smartHelpdeskwithAgent/
+   cd smartHelpdeskwithAgent
    ```
 
 ### Step 3: Start the Application
@@ -336,5 +336,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **🎉 Congratulations! You now have a fully functional AI-powered helpdesk system running locally.**
+
 
 *Need help? Check the troubleshooting section above or create an issue in the repository.*
