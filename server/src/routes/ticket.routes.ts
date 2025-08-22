@@ -160,6 +160,90 @@ router.put('/:id/status', authenticate, authorize(['admin','agent']), async (req
   }
 });
 
+// Delete ticket (creator or admin)
+router.delete('/:id', authenticate, async (req, res): Promise<void> => {
+  try {
+    const ticketId = req.params.id;
+    if (!ticketId) {
+      res.status(400).json({ error: { code: 'INVALID_TICKET_ID', message: 'Ticket ID is required' } });
+      return;
+    }
+    
+    const userId = req.user!.sub;
+    const userRole = req.user!.role;
+    
+    // Get the ticket to check ownership
+    const ticket = await TicketService.getById(ticketId);
+    if (!ticket) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Ticket not found' } });
+      return;
+    }
+    
+    // Check if user can delete this ticket
+    const isCreator = String((ticket.createdBy as any)._id || ticket.createdBy) === userId;
+    const isAdmin = userRole === 'admin';
+    
+    if (!isCreator && !isAdmin) {
+      res.status(403).json({ 
+        error: { 
+          code: 'FORBIDDEN', 
+          message: 'You can only delete tickets you created' 
+        } 
+      });
+      return;
+    }
+    
+    // Delete the ticket
+    const result = await TicketService.deleteTicket(ticketId);
+    if (!result) {
+      res.status(500).json({ error: { code: 'DELETE_FAILED', message: 'Failed to delete ticket' } });
+      return;
+    }
+    
+    // Log the deletion
+    await AuditLogService.log(
+      ticketId,
+      req.traceId || 'n/a',
+      userRole === 'admin' ? 'agent' : 'user',
+      'TICKET_DELETED',
+      {
+        deletedBy: userId,
+        ticketTitle: ticket.title,
+        isCreator,
+        isAdmin
+      }
+    );
+    
+    // Send notification to relevant parties
+    const deleter = await User.findById(userId).select('name');
+    
+    // Notify assigned agent if ticket was assigned and deleter is not the agent
+    if (ticket.assignee && String((ticket.assignee as any)._id || ticket.assignee) !== userId) {
+      Notifications.broadcastToUser(String((ticket.assignee as any)._id || ticket.assignee), 'ticket_deleted', {
+        ticketId,
+        ticketTitle: ticket.title,
+        deletedBy: deleter?.name || (isAdmin ? 'Admin' : 'User')
+      });
+    }
+    
+    // If admin deleted user's ticket, notify the creator
+    if (isAdmin && !isCreator) {
+      Notifications.broadcastToUser(String((ticket.createdBy as any)._id || ticket.createdBy), 'ticket_deleted', {
+        ticketId,
+        ticketTitle: ticket.title,
+        deletedBy: deleter?.name || 'Admin'
+      });
+    }
+    
+    res.json({ 
+      message: 'Ticket deleted successfully',
+      ticketId
+    });
+  } catch (err: any) {
+    res.status(400).json({ error: { code: 'TICKET_DELETE_FAILED', message: err.message } });
+  }
+});
+
 export default router;
 
 

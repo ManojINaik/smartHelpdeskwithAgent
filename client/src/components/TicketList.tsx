@@ -14,8 +14,7 @@ import {
   SortAsc,
   MessageSquare,
   Calendar,
-  User,
-  Clock
+  User
 } from 'lucide-react';
 
 export const TicketList: React.FC = () => {
@@ -31,17 +30,6 @@ export const TicketList: React.FC = () => {
   }, [items, sort]);
   
   const showFilterOptions = userRole === 'admin' || userRole === 'agent';
-  
-  const getStatusColor = (ticketStatus: string) => {
-    switch (ticketStatus) {
-      case 'open': return 'text-primary-500';
-      case 'triaged': return 'text-warning-500';
-      case 'waiting_human': return 'text-warning-400';
-      case 'resolved': return 'text-success-500';
-      case 'closed': return 'text-neutral-500';
-      default: return 'text-neutral-400';
-    }
-  };
   
   return (
     <div className="space-y-4">

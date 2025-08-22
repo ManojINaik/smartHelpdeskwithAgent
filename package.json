@@ -3,6 +3,16 @@
   "version": "1.0.0",
   "description": "AI-powered smart helpdesk system with automated ticket triage",
   "scripts": {
+    "start": "docker compose up",
+    "start:build": "docker compose up --build",
+    "start:detached": "docker compose up -d",
+    "stop": "docker compose down",
+    "restart": "docker compose restart",
+    "logs": "docker compose logs -f",
+    "health": "node scripts/health-check.js",
+    "seed": "docker compose run --rm seeder",
+    "seed:local": "node scripts/seed-database.js",
+    "setup": "docker compose up --build -d && npm run seed && npm run health",
     "dev": "docker-compose up -d",
     "dev:build": "docker-compose up --build -d",
     "dev:down": "docker-compose down",
@@ -33,6 +43,8 @@
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",
+    "bcryptjs": "^2.4.3",
+    "mongodb": "^6.3.0",
     "mongodb-memory-server": "^10.2.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1"

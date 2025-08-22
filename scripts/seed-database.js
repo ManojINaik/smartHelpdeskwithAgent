@@ -5,14 +5,22 @@
  * 
  * This script populates the database with sample data for development and testing.
  * Run with: node scripts/seed-database.js
+ * Docker: docker compose run --rm seeder
  */
 
 const { MongoClient } = require('mongodb');
 const bcrypt = require('bcryptjs');
 
-// Configuration
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/smart_helpdesk?authSource=admin';
-const SAMPLE_DATA_SIZE = process.env.SAMPLE_DATA_SIZE || 50;
+// Configuration with better defaults for Docker environment
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://admin:password@mongodb:27017/smart_helpdesk?authSource=admin';
+const SAMPLE_DATA_SIZE = parseInt(process.env.SAMPLE_DATA_SIZE) || 50;
+const CLEAR_EXISTING = process.env.CLEAR_EXISTING !== 'false'; // Default true
+
+console.log('🔧 Configuration:');
+console.log(`   MongoDB URI: ${MONGODB_URI.replace(/:\/\/[^:]+:[^@]+@/, '://***:***@')}`);
+console.log(`   Sample data size: ${SAMPLE_DATA_SIZE}`);
+console.log(`   Clear existing data: ${CLEAR_EXISTING}`);
+console.log();
 
 // Sample data
 const sampleUsers = [
@@ -207,14 +215,24 @@ async function seedDatabase() {
     const db = client.db();
     console.log('✅ Connected to database');
     
-    // Clear existing data (optional - comment out for production)
-    console.log('🧹 Clearing existing data...');
-    await db.collection('users').deleteMany({});
-    await db.collection('articles').deleteMany({});
-    await db.collection('tickets').deleteMany({});
-    await db.collection('configs').deleteMany({});
-    await db.collection('agentsuggestions').deleteMany({});
-    await db.collection('auditlogs').deleteMany({});
+    // Clear existing data (conditional based on CLEAR_EXISTING env var)
+    if (CLEAR_EXISTING) {
+      console.log('🧹 Clearing existing data...');
+      await db.collection('users').deleteMany({});
+      await db.collection('articles').deleteMany({});
+      await db.collection('tickets').deleteMany({});
+      await db.collection('configs').deleteMany({});
+      await db.collection('agentsuggestions').deleteMany({});
+      await db.collection('auditlogs').deleteMany({});
+      console.log('✅ Existing data cleared');
+    } else {
+      console.log('🔄 Skipping data clearing (CLEAR_EXISTING=false)');
+      // Check if data already exists
+      const existingUsers = await db.collection('users').countDocuments();
+      if (existingUsers > 0) {
+        console.log(`⚠️ Found ${existingUsers} existing users. Seeding may create duplicates.`);
+      }
+    }
     
     // Insert users
     console.log('👥 Inserting users...');
@@ -328,3 +346,4 @@ if (require.main === module) {
 }
 
 module.exports = { seedDatabase };
+

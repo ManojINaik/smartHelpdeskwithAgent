@@ -156,5 +156,23 @@ articleSchema.methods.getRelevanceScore = function(query: string): number {
   return score;
 };
 
+// Post-save middleware for embedding generation
+articleSchema.post('save', function(doc) {
+  // Trigger embedding generation for published articles (async)
+  if (doc.status === 'published') {
+    import('../services/rag.service.js').then(({ default: RAGService }) => {
+      RAGService.generateEmbeddingForArticle(String(doc._id))
+        .then(() => {
+          console.log(`✅ Auto-generated embedding for article ${doc._id}`);
+        })
+        .catch((error: any) => {
+          console.error(`❌ Auto-embedding failed for article ${doc._id}:`, error);
+        });
+    }).catch(() => {
+      // Ignore import errors in case RAG service is not available
+    });
+  }
+});
+
 export const Article = model<IArticle>('Article', articleSchema);
 export default Article;

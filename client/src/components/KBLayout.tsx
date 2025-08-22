@@ -13,7 +13,6 @@ import {
   Settings,
   BarChart3,
   Users,
-  Shield,
   LogOut
 } from 'lucide-react';
 

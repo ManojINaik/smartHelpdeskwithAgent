@@ -6,6 +6,13 @@ import { authenticate, authorize } from '../middleware/auth.js';
 const router = Router();
 
 // Search KB (public or authenticated user)
+router.get('/articles', async (req, res) => {
+  const query = String(req.query.search || '').trim();
+  const results = await KnowledgeBaseService.searchArticles(query, false);
+  res.json({ articles: results });
+});
+
+// Legacy endpoint for backward compatibility
 router.get('/', async (req, res) => {
   const query = String(req.query.query || '').trim();
   const results = await KnowledgeBaseService.searchArticles(query, false);
@@ -13,6 +20,18 @@ router.get('/', async (req, res) => {
 });
 
 // Get all articles - admin can see drafts, others see published only
+router.get('/articles/all', async (req, res) => {
+  try {
+    const isAdmin = req.user?.role === 'admin';
+    const includeUnpublished = isAdmin;
+    const results = await KnowledgeBaseService.getAllArticles(includeUnpublished);
+    res.json({ results });
+  } catch (err: any) {
+    res.status(500).json({ error: { code: 'KB_LIST_FAILED', message: err.message } });
+  }
+});
+
+// Legacy endpoint for backward compatibility
 router.get('/all', async (req, res) => {
   try {
     const isAdmin = req.user?.role === 'admin';
@@ -25,6 +44,20 @@ router.get('/all', async (req, res) => {
 });
 
 // Get individual article (public or authenticated user)
+router.get('/articles/:id', async (req, res) => {
+  try {
+    const article = await KnowledgeBaseService.getArticle(req.params.id as string);
+    if (!article) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Article not found' } });
+      return;
+    }
+    res.json({ article });
+  } catch (err: any) {
+    res.status(400).json({ error: { code: 'KB_GET_FAILED', message: err.message } });
+  }
+});
+
+// Legacy endpoint for backward compatibility
 router.get('/:id', async (req, res) => {
   try {
     const article = await KnowledgeBaseService.getArticle(req.params.id as string);
@@ -46,6 +79,18 @@ const articleSchema = z.object({
   status: z.enum(['draft', 'published']).optional(),
 });
 
+router.post('/articles', authenticate, authorize(['admin']), async (req, res) => {
+  try {
+    const data = articleSchema.parse(req.body);
+    const createdBy = req.user!.sub;
+    const article = await KnowledgeBaseService.createArticle({ ...data, createdBy });
+    res.status(201).json({ article });
+  } catch (err: any) {
+    res.status(400).json({ error: { code: 'KB_CREATE_FAILED', message: err.message } });
+  }
+});
+
+// Legacy endpoint for backward compatibility
 router.post('/', authenticate, authorize(['admin']), async (req, res) => {
   try {
     const data = articleSchema.parse(req.body);
@@ -64,6 +109,23 @@ const updateSchema = z.object({
   status: z.enum(['draft', 'published']).optional(),
 });
 
+router.put('/articles/:id', authenticate, authorize(['admin']), async (req, res): Promise<void> => {
+  try {
+    const updates = updateSchema.parse(req.body);
+    const updated = await KnowledgeBaseService.updateArticle(req.params.id as string, updates);
+    if (!updated) { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Article not found' } }); return; }
+    res.json({ article: updated });
+  } catch (err: any) {
+    res.status(400).json({ error: { code: 'KB_UPDATE_FAILED', message: err.message } });
+  }
+});
+
+router.delete('/articles/:id', authenticate, authorize(['admin']), async (req, res): Promise<void> => {
+  await KnowledgeBaseService.deleteArticle(req.params.id as string);
+  res.status(204).send();
+});
+
+// Legacy endpoints for backward compatibility
 router.put('/:id', authenticate, authorize(['admin']), async (req, res): Promise<void> => {
   try {
     const updates = updateSchema.parse(req.body);

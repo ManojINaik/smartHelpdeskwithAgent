@@ -14,6 +14,7 @@ import requestLogger from './middleware/logger.js';
 import auditRoutes from './routes/audit.routes.js';
 import configRoutes from './routes/config.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import ragRoutes from './routes/rag.routes.js';
 import sanitizeRequest from './middleware/security.js';
 
 // Load environment variables
@@ -90,6 +91,8 @@ app.use('/api/agent', agentRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/admin', adminRoutes);
+// RAG routes
+app.use('/api/rag', ragRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

@@ -8,7 +8,6 @@ import { Badge } from '../components/ui/badge';
 import { Search, Edit3, Calendar, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import MarkdownRenderer from '../components/MarkdownRenderer';
 
 interface Article {
   _id: string;

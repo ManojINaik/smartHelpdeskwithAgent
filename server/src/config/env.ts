@@ -23,6 +23,14 @@ const envSchema = z.object({
   LLM_PROVIDER: z.enum(['gemini', 'stub']).default('stub'),
   STUB_MODE: z.string().transform(val => val === 'true').default('true'),
   
+  // Atlas Vector Search
+  ATLAS_VECTOR_SEARCH_ENABLED: z.string().transform(val => val === 'true').default('false'),
+  ATLAS_SEARCH_INDEX_NAME: z.string().default('vector_index'),
+  ATLAS_VECTOR_DIMENSION: z.string().transform(Number).default('384'),
+  ATLAS_VECTOR_SIMILARITY: z.enum(['cosine', 'euclidean', 'dotProduct']).default('cosine'),
+  ATLAS_VECTOR_CANDIDATES: z.string().transform(Number).default('100'),
+  ATLAS_SEARCH_SCORE_THRESHOLD: z.string().transform(Number).default('0.3'),
+  
   // Email
   EMAIL_SERVICE_URL: z.string().optional(),
   EMAIL_FROM: z.string().email().optional(),

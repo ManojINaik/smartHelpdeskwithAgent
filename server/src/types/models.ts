@@ -122,3 +122,40 @@ export interface IDraftResult {
   citations: string[];
   confidence: number;
 }
+
+// RAG (Retrieval-Augmented Generation) related types
+export interface IArticleEmbedding extends BaseDocument {
+  articleId: ObjectId;
+  content: string;
+  embedding: number[];
+  embeddingModel: string;
+  chunks?: {
+    text: string;
+    embedding: number[];
+    startIndex: number;
+    endIndex: number;
+  }[];
+  lastUpdated: Date;
+}
+
+export interface IEmbeddingResult {
+  embedding: number[];
+  model: string;
+  dimensions: number;
+}
+
+export interface IRAGResult {
+  articles: IScoredArticle[];
+  query: string;
+  searchMethod: 'vector' | 'hybrid' | 'keyword';
+  totalMatches: number;
+  executionTimeMs: number;
+}
+
+export interface IRAGContext {
+  articles: IArticle[];
+  relevanceScores: number[];
+  searchQuery: string;
+  totalTokens: number;
+  maxContextLength: number;
+}

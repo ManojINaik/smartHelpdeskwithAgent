@@ -10,7 +10,6 @@ import {
   Settings, 
   BookOpen, 
   MessageSquare, 
-  Shield,
   LogOut,
   User,
   Menu,

@@ -5,7 +5,7 @@ import CreateTicketForm from '../components/CreateTicketForm';
 import TicketList from '../components/TicketList';
 import AuthLayout from '../components/AuthLayout';
 import LandingHero from '../components/LandingHero';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, ModernCard } from '../components/ui/card';
+import { ModernCard } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { 
   MessageSquare, 

@@ -10,7 +10,6 @@ import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Label } from './ui/label';
 import { Alert, AlertDescription } from './ui/alert';
-import { ModernCard } from './ui/card';
 import { Badge } from './ui/badge';
 import { CheckCircle, AlertCircle, Paperclip, CreditCard } from 'lucide-react';
 

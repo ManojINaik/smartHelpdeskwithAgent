@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import { vi } from 'vitest';
 import { validateEnv } from '../config/env.js';
 import authRoutes from '../routes/auth.routes.js';
 import kbRoutes from '../routes/kb.routes.js';
@@ -9,6 +10,7 @@ import ticketRoutes from '../routes/ticket.routes.js';
 import agentRoutes from '../routes/agent.routes.js';
 import auditRoutes from '../routes/audit.routes.js';
 import configRoutes from '../routes/config.routes.js';
+import ragRoutes from '../routes/rag.routes.js';
 // Avoid importing ws in tests
 vi.mock('../services/notify.service.js', () => ({ __esModule: true, default: { init: () => {}, broadcastToUser: () => {} } }));
 import { authenticate, authorize } from '../middleware/auth.js';
@@ -26,6 +28,7 @@ app.use('/api/tickets', ticketRoutes);
 app.use('/api/agent', agentRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/config', configRoutes);
+app.use('/api/rag', ragRoutes);
 
 // Protected test route for RBAC validation
 app.get('/api/secure/admin', authenticate, authorize(['admin']), (req, res) => {

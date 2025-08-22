@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { AdminLayout } from '../components/AdminLayout';
@@ -13,6 +13,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
+import {
   ArrowLeft,
   Calendar,
   Clock,
@@ -25,17 +34,21 @@ import {
   Info,
   History,
   Eye,
-  Edit3
+  Edit3,
+  Trash2
 } from 'lucide-react';
 
 export const TicketDetail: React.FC = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [ticket, setTicket] = useState<any>(null);
   const [audit, setAudit] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reply, setReply] = useState('');
   const [sending, setSending] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const isPrivileged = user?.role === 'admin' || user?.role === 'agent';
@@ -92,6 +105,32 @@ export const TicketDetail: React.FC = () => {
     } finally {
       setUpdating(false);
     }
+  };
+
+  const deleteTicket = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      await api.delete(`/api/tickets/${id}`);
+      setShowDeleteDialog(false);
+      // Navigate back to the appropriate page based on user role
+      const backPath = user?.role === 'admin' ? '/admin/metrics' : user?.role === 'agent' ? '/agent' : '/';
+      navigate(backPath);
+    } catch (err: any) {
+      setError(err?.response?.data?.error?.message || 'Failed to delete ticket');
+      setShowDeleteDialog(false);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // Check if current user can delete this ticket
+  const canDeleteTicket = () => {
+    if (!ticket || !user) return false;
+    const isCreator = ticket.createdBy?._id === user.id || ticket.createdBy?.email === user.email;
+    const isAdmin = user.role === 'admin';
+    return isCreator || isAdmin;
   };
 
   const getStatusColor = (status: string) => {
@@ -226,6 +265,47 @@ export const TicketDetail: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">Ticket Details</h1>
             <p className="text-gray-600">View and manage ticket information</p>
           </div>
+          {/* Delete Button - Only show for ticket creators and admins */}
+          {canDeleteTicket() && (
+            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+              <DialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Ticket
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete Ticket</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete this ticket? This action cannot be undone.
+                    All replies and conversation history will be permanently removed.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDeleteDialog(false)}
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={deleteTicket}
+                    disabled={deleting}
+                  >
+                    {deleting ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-2" />
+                    )}
+                    {deleting ? 'Deleting...' : 'Delete Ticket'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         {/* Error Alert */}

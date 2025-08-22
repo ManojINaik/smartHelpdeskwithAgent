@@ -32,8 +32,6 @@ export const TicketStatus: React.FC<{ status: TStatus }> = ({ status }) => {
         return 'Resolved';
       case 'closed':
         return 'Closed';
-      default:
-        return status.charAt(0).toUpperCase() + status.slice(1);
     }
   };
   

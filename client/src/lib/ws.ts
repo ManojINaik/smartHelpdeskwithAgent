@@ -107,12 +107,29 @@ export class WSClient {
 
   on(event: string, handler: (payload: any) => void) {
     const set = this.listeners.get(event) || new Set<(p: any) => void>();
+    
+    // Check if this exact handler is already registered to prevent duplicates
+    if (set.has(handler)) {
+      console.log(`⚠️ WebSocket: Handler already registered for "${event}", skipping duplicate`);
+      return () => {
+        set.delete(handler);
+        console.log(`🗑️ WebSocket: Removed listener for "${event}", remaining: ${set.size}`);
+      };
+    }
+    
     set.add(handler); 
     this.listeners.set(event, set);
     console.log(`👂 WebSocket: Registered listener for "${event}", total listeners: ${set.size}`);
+    
     return () => {
       set.delete(handler);
       console.log(`🗑️ WebSocket: Removed listener for "${event}", remaining: ${set.size}`);
+      
+      // Clean up empty sets
+      if (set.size === 0) {
+        this.listeners.delete(event);
+        console.log(`🧹 WebSocket: Cleaned up empty listener set for "${event}"`);
+      }
     };
   }
 

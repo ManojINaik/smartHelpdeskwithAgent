@@ -1,4 +1,5 @@
 import { IArticle, IClassificationResult, IDraftResult } from '../../types/models.js';
+import RAGService from '../rag.service.js';
 
 const BILLING_KEYWORDS = ['refund', 'invoice', 'charge', 'payment', 'billing', 'credit', 'card', 'subscription', 'plan', 'cost', 'fee', 'price'];
 const TECH_KEYWORDS = ['error', 'bug', 'stack', 'crash', 'exception', '500', '404', 'not working', 'issue', 'broken', 'malfunction', 'glitch', 'problem', 'fail'];
@@ -111,13 +112,80 @@ function generateActionSteps(category: string, articles: IArticle[]): string[] {
   
   let steps = [...(baseSteps[category as keyof typeof baseSteps] || baseSteps.other)];
   
-  // Add article-specific steps if articles are available
+  // Extract actionable steps from articles using RAG-enhanced processing
   if (articles.length > 0) {
+    const articleSteps = extractActionableStepsFromArticles(articles, category);
+    
+    // Replace generic steps with article-specific ones if available
+    if (articleSteps.length > 0) {
+      steps = [...articleSteps, ...steps.slice(articleSteps.length)];
+    }
+    
+    // Add reference to helpful resources
     const topArticles = articles.slice(0, 2);
     steps.push(`Review the following helpful resources: ${topArticles.map(a => a.title).join(' and ')}`);
   }
   
   return steps.slice(0, 4); // Limit to 4 steps for clarity and focus
+}
+
+/**
+ * Extract actionable steps from articles using RAG techniques
+ */
+function extractActionableStepsFromArticles(articles: IArticle[], category: string): string[] {
+  const steps: string[] = [];
+  
+  for (const article of articles.slice(0, 2)) { // Process top 2 articles
+    // Look for numbered lists, bullet points, or step-by-step instructions
+    const content = `${article.title}\n${article.body}`.toLowerCase();
+    
+    // Extract numbered steps
+    const numberedSteps = content.match(/\d+\.[^\n]+/g);
+    if (numberedSteps && numberedSteps.length > 0) {
+      steps.push(...numberedSteps.slice(0, 2).map(step => 
+        step.replace(/^\d+\.\s*/, '').trim().charAt(0).toUpperCase() + 
+        step.replace(/^\d+\.\s*/, '').trim().slice(1)
+      ));
+    }
+    
+    // Extract bullet points
+    const bulletPoints = content.match(/[•\-\*]\s*[^\n]+/g);
+    if (bulletPoints && bulletPoints.length > 0 && steps.length < 2) {
+      steps.push(...bulletPoints.slice(0, 2 - steps.length).map(point => 
+        point.replace(/^[•\-\*]\s*/, '').trim().charAt(0).toUpperCase() + 
+        point.replace(/^[•\-\*]\s*/, '').trim().slice(1)
+      ));
+    }
+    
+    // Extract sentences with action words for the specific category
+    if (steps.length < 2) {
+      const actionWords = {
+        billing: ['contact', 'check', 'verify', 'update', 'review', 'submit'],
+        tech: ['restart', 'clear', 'update', 'reinstall', 'try', 'check'],
+        shipping: ['track', 'contact', 'verify', 'check', 'call', 'confirm'],
+        other: ['review', 'contact', 'check', 'verify', 'visit', 'try']
+      };
+      
+      const categoryActions = actionWords[category as keyof typeof actionWords] || actionWords.other;
+      const sentences = content.split(/[.!?]+/);
+      
+      for (const sentence of sentences) {
+        if (steps.length >= 2) break;
+        
+        for (const action of categoryActions) {
+          if (sentence.includes(action) && sentence.length > 10 && sentence.length < 100) {
+            const cleanSentence = sentence.trim().charAt(0).toUpperCase() + sentence.trim().slice(1);
+            if (!steps.some(step => step.toLowerCase().includes(sentence.toLowerCase().substring(0, 20)))) {
+              steps.push(cleanSentence);
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  return steps.slice(0, 2); // Return max 2 article-derived steps
 }
 
 export class StubLLMProvider {
@@ -166,6 +234,14 @@ export class StubLLMProvider {
     const classification = await this.classify(text);
     const category = classification.predictedCategory;
     
+    console.log(`🤖 RAG-Enhanced Stub Draft Generation:`, {
+      query: text.substring(0, 100) + '...',
+      category,
+      confidence: classification.confidence,
+      articlesProvided: articles.length,
+      articleTitles: articles.map(a => a.title)
+    });
+    
     const lines: string[] = [];
     
     // Professional greeting based on category
@@ -174,20 +250,35 @@ export class StubLLMProvider {
     
     // Add structured solution based on category and articles
     if (articles.length > 0) {
+      // Enhanced article analysis for better responses
+      const relevantContent = this.extractRelevantContent(text, articles, category);
+      
       lines.push('**Recommended Solution:**');
       lines.push('');
       
+      // Use RAG-enhanced action steps
       const actionSteps = generateActionSteps(category, articles);
       actionSteps.forEach((step, idx) => {
         lines.push(`${idx + 1}. ${step}`);
       });
       lines.push('');
       
-      // Add relevant knowledge base articles
+      // Add specific insights from articles if found
+      if (relevantContent.insights.length > 0) {
+        lines.push('**Based on our knowledge base:**');
+        lines.push('');
+        relevantContent.insights.forEach(insight => {
+          lines.push(`• ${insight}`);
+        });
+        lines.push('');
+      }
+      
+      // Add relevant knowledge base articles with context
       lines.push('**Additional Resources:**');
       lines.push('');
       articles.slice(0, 3).forEach((article, idx) => {
-        lines.push(`• [${article.title}](#kb-article-${article._id})`);
+        const relevanceNote = this.getArticleRelevanceNote(text, article, category);
+        lines.push(`• [${article.title}](#kb-article-${article._id})${relevanceNote ? ` - ${relevanceNote}` : ''}`);
       });
       lines.push('');
     } else {
@@ -254,10 +345,99 @@ export class StubLLMProvider {
     const baseConfidence = classification.confidence;
     const articleBonus = Math.min(0.15, articles.length * 0.05);
     const lengthPenalty = text.length < 20 ? -0.1 : 0; // Penalize very short descriptions
+    const ragBonus = articles.length > 0 ? 0.1 : 0; // Bonus for having relevant articles
     
-    const confidence = Math.max(0.3, Math.min(0.95, baseConfidence + articleBonus + lengthPenalty));
+    const confidence = Math.max(0.3, Math.min(0.95, baseConfidence + articleBonus + lengthPenalty + ragBonus));
+    
+    console.log(`✨ Enhanced confidence calculation:`, {
+      baseConfidence,
+      articleBonus,
+      lengthPenalty,
+      ragBonus,
+      finalConfidence: confidence
+    });
     
     return { draftReply, citations, confidence };
+  }
+  
+  /**
+   * Extract relevant content and insights from articles
+   */
+  private extractRelevantContent(query: string, articles: IArticle[], category: string) {
+    const insights: string[] = [];
+    const queryLower = query.toLowerCase();
+    const queryWords = queryLower.split(/\s+/).filter(word => word.length > 3);
+    
+    for (const article of articles.slice(0, 2)) {
+      const content = `${article.title} ${article.body}`.toLowerCase();
+      
+      // Look for sentences that contain query keywords
+      const sentences = content.split(/[.!?]+/);
+      
+      for (const sentence of sentences) {
+        const sentenceTrimmed = sentence.trim();
+        if (sentenceTrimmed.length < 20 || sentenceTrimmed.length > 150) continue;
+        
+        // Check if sentence contains relevant keywords
+        const relevantWords = queryWords.filter(word => sentenceTrimmed.includes(word));
+        
+        if (relevantWords.length >= 1 && insights.length < 3) {
+          // Clean up and format the insight
+          const insight = sentenceTrimmed
+            .charAt(0).toUpperCase() + sentenceTrimmed.slice(1)
+            .replace(/\s+/g, ' ')
+            .trim();
+          
+          if (!insights.some(existing => existing.toLowerCase().includes(insight.toLowerCase().substring(0, 20)))) {
+            insights.push(insight);
+          }
+        }
+      }
+    }
+    
+    return { insights };
+  }
+  
+  /**
+   * Get a relevance note for an article
+   */
+  private getArticleRelevanceNote(query: string, article: IArticle, category: string): string {
+    const queryLower = query.toLowerCase();
+    const titleLower = article.title.toLowerCase();
+    
+    // Check for direct keyword matches
+    if (titleLower.includes('troubleshoot') || titleLower.includes('fix')) {
+      return 'troubleshooting guide';
+    }
+    
+    if (titleLower.includes('step') || titleLower.includes('how to')) {
+      return 'step-by-step instructions';
+    }
+    
+    if (titleLower.includes('policy') || titleLower.includes('terms')) {
+      return 'policy information';
+    }
+    
+    // Category-specific relevance
+    switch (category) {
+      case 'billing':
+        if (titleLower.includes('refund') || titleLower.includes('payment')) {
+          return 'payment guidance';
+        }
+        break;
+      case 'tech':
+        if (titleLower.includes('error') || titleLower.includes('problem')) {
+          return 'technical solution';
+        }
+        break;
+      case 'shipping':
+        if (titleLower.includes('delivery') || titleLower.includes('track')) {
+          return 'shipping information';
+        }
+        break;
+    }
+    
+    return 'helpful resource';
   }
 }
 

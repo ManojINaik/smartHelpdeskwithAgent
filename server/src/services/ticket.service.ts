@@ -113,6 +113,16 @@ export class TicketService {
     await ticket.save();
     return ticket;
   }
+
+  static async deleteTicket(id: string): Promise<boolean> {
+    try {
+      const result = await Ticket.findByIdAndDelete(id);
+      return result !== null;
+    } catch (error) {
+      console.error('Error deleting ticket:', error);
+      return false;
+    }
+  }
 }
 
 export default TicketService;

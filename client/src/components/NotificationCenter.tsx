@@ -1,4 +1,4 @@
-import React, { useEffect, useState, createContext, useContext } from 'react';
+import React, { useEffect, useState, createContext, useContext, useRef } from 'react';
 import wsClient from '../lib/ws';
 import { ModernCard } from './ui/card';
 import { Badge } from './ui/badge';
@@ -8,7 +8,11 @@ import {
   CheckCircle, 
   User, 
   X,
-  Clock
+  Clock,
+  AlertTriangle,
+  Shield,
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 
 interface Notice { 
@@ -40,9 +44,19 @@ export const useNotifications = () => {
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
+  const mountedRef = useRef(true);
+  const listenersRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
+    mountedRef.current = true;
+    
+    console.log('🎯 NotificationProvider: Setting up WebSocket listeners');
+    
     const offStatus = wsClient.on('ticket_status', (payload) => {
+      if (!mountedRef.current) {
+        console.log('⚠️ Received notification but component is unmounted, ignoring');
+        return;
+      }
       console.log('📧 Received ticket_status notification:', payload);
       setNotices(n => [{ 
         id: String(Date.now()), 
@@ -53,6 +67,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     });
     
     const offAssign = wsClient.on('ticket_assigned', (payload) => {
+      if (!mountedRef.current) {
+        console.log('⚠️ Received notification but component is unmounted, ignoring');
+        return;
+      }
       console.log('📧 Received ticket_assigned notification:', payload);
       setNotices(n => [{ 
         id: String(Date.now()), 
@@ -63,6 +81,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     });
     
     const offReply = wsClient.on('ticket_reply', (payload) => {
+      if (!mountedRef.current) {
+        console.log('⚠️ Received notification but component is unmounted, ignoring');
+        return;
+      }
       console.log('📧 Received ticket_reply notification:', payload);
       setNotices(n => [{ 
         id: String(Date.now()), 
@@ -72,10 +94,84 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }, ...n]);
     });
     
+    const offEscalated = wsClient.on('ticket_escalated', (payload) => {
+      if (!mountedRef.current) {
+        console.log('⚠️ Received notification but component is unmounted, ignoring');
+        return;
+      }
+      console.log('📧 Received ticket_escalated notification:', payload);
+      setNotices(n => [{ 
+        id: String(Date.now()), 
+        event: 'ticket_escalated', 
+        payload, 
+        time: new Date().toISOString() 
+      }, ...n]);
+    });
+    
+    const offSlaBreach = wsClient.on('sla_breach', (payload) => {
+      if (!mountedRef.current) {
+        console.log('⚠️ Received notification but component is unmounted, ignoring');
+        return;
+      }
+      console.log('📧 Received sla_breach notification:', payload);
+      setNotices(n => [{ 
+        id: String(Date.now()), 
+        event: 'sla_breach', 
+        payload, 
+        time: new Date().toISOString() 
+      }, ...n]);
+    });
+    
+    const offUrgentTicket = wsClient.on('urgent_ticket', (payload) => {
+      if (!mountedRef.current) {
+        console.log('⚠️ Received notification but component is unmounted, ignoring');
+        return;
+      }
+      console.log('📧 Received urgent_ticket notification:', payload);
+      setNotices(n => [{ 
+        id: String(Date.now()), 
+        event: 'urgent_ticket', 
+        payload, 
+        time: new Date().toISOString() 
+      }, ...n]);
+    });
+    
+    const offTicketDeleted = wsClient.on('ticket_deleted', (payload) => {
+      if (!mountedRef.current) {
+        console.log('⚠️ Received notification but component is unmounted, ignoring');
+        return;
+      }
+      console.log('📧 Received ticket_deleted notification:', payload);
+      setNotices(n => [{ 
+        id: String(Date.now()), 
+        event: 'ticket_deleted', 
+        payload, 
+        time: new Date().toISOString() 
+      }, ...n]);
+    });
+    
+    const offTicketResolved = wsClient.on('ticket_resolved', (payload) => {
+      if (!mountedRef.current) {
+        console.log('⚠️ Received notification but component is unmounted, ignoring');
+        return;
+      }
+      console.log('📧 Received ticket_resolved notification:', payload);
+      setNotices(n => [{ 
+        id: String(Date.now()), 
+        event: 'ticket_resolved', 
+        payload, 
+        time: new Date().toISOString() 
+      }, ...n]);
+    });
+    
+    // Store cleanup functions
+    listenersRef.current = [offStatus, offAssign, offReply, offEscalated, offSlaBreach, offUrgentTicket, offTicketDeleted, offTicketResolved];
+    
     return () => { 
-      offStatus(); 
-      offAssign();
-      offReply();
+      console.log('🧹 NotificationProvider: Cleaning up WebSocket listeners');
+      mountedRef.current = false;
+      listenersRef.current.forEach(cleanup => cleanup());
+      listenersRef.current = [];
     };
   }, []);
 
@@ -156,6 +252,16 @@ export const NotificationCenter: React.FC = () => {
         return <User className="w-5 h-5 text-primary-500" />;
       case 'ticket_reply':
         return <Bell className="w-5 h-5 text-warning-500" />;
+      case 'ticket_escalated':
+        return <AlertTriangle className="w-5 h-5 text-warning-400" />;
+      case 'sla_breach':
+        return <AlertCircle className="w-5 h-5 text-warning-400" />;
+      case 'urgent_ticket':
+        return <Shield className="w-5 h-5 text-warning-400" />;
+      case 'ticket_deleted':
+        return <Trash2 className="w-5 h-5 text-neutral-600" />;
+      case 'ticket_resolved':
+        return <CheckCircle className="w-5 h-5 text-success-500" />;
       default:
         return <Bell className="w-5 h-5 text-neutral-400" />;
     }
@@ -169,6 +275,16 @@ export const NotificationCenter: React.FC = () => {
         return 'Ticket Assigned';
       case 'ticket_reply':
         return 'New Reply';
+      case 'ticket_escalated':
+        return 'Ticket Escalated';
+      case 'sla_breach':
+        return 'SLA Breach Alert';
+      case 'urgent_ticket':
+        return 'Urgent Ticket';
+      case 'ticket_deleted':
+        return 'Ticket Deleted';
+      case 'ticket_resolved':
+        return 'Ticket Resolved';
       default:
         return 'Notification';
     }
@@ -192,6 +308,32 @@ export const NotificationCenter: React.FC = () => {
         const replyTicketTitle = replyPayload.ticketTitle ? ` "${replyPayload.ticketTitle}"` : '';
         const replyAuthor = replyPayload.replyAuthor ? ` from ${replyPayload.replyAuthor}` : '';
         return `New reply${replyAuthor} on ticket${replyTicketTitle}`;
+      case 'ticket_escalated':
+        const escalatedPayload = notice.payload;
+        const escalatedTitle = escalatedPayload.ticketTitle ? ` "${escalatedPayload.ticketTitle}"` : '';
+        const escalatedBy = escalatedPayload.escalatedBy ? ` by ${escalatedPayload.escalatedBy}` : '';
+        const reason = escalatedPayload.reason ? ` - ${escalatedPayload.reason}` : '';
+        return `Ticket${escalatedTitle} has been escalated${escalatedBy}${reason}`;
+      case 'sla_breach':
+        const slaPayload = notice.payload;
+        const slaTitle = slaPayload.ticketTitle ? ` "${slaPayload.ticketTitle}"` : '';
+        const hours = slaPayload.hoursSinceCreation ? ` (${slaPayload.hoursSinceCreation}h)` : '';
+        return `SLA breach alert for ticket${slaTitle}${hours} - immediate attention required`;
+      case 'urgent_ticket':
+        const urgentPayload = notice.payload;
+        const urgentTitle = urgentPayload.ticketTitle ? ` "${urgentPayload.ticketTitle}"` : '';
+        const urgentReason = urgentPayload.reason ? ` - ${urgentPayload.reason}` : '';
+        return `Urgent ticket requires immediate attention${urgentTitle}${urgentReason}`;
+      case 'ticket_deleted':
+        const deletedPayload = notice.payload;
+        const deletedTitle = deletedPayload.ticketTitle ? ` "${deletedPayload.ticketTitle}"` : '';
+        const deletedBy = deletedPayload.deletedBy ? ` by ${deletedPayload.deletedBy}` : '';
+        return `Ticket${deletedTitle} has been deleted${deletedBy}`;
+      case 'ticket_resolved':
+        const resolvedPayload = notice.payload;
+        const resolvedTitle = resolvedPayload.ticketTitle ? ` "${resolvedPayload.ticketTitle}"` : '';
+        const resolvedBy = resolvedPayload.resolvedBy ? ` by ${resolvedPayload.resolvedBy}` : '';
+        return `Ticket${resolvedTitle} has been resolved${resolvedBy}`;
       default:
         return JSON.stringify(notice.payload);
     }

@@ -1,5 +1,7 @@
 import Article from '../models/Article.js';
 import { IArticle, IScoredArticle } from '../types/models.js';
+import RAGService from './rag.service.js';
+import VectorEmbeddingService from './vectorEmbedding.service.js';
 
 export interface CreateArticleData {
   title: string;
@@ -49,13 +51,20 @@ export class KnowledgeBaseService {
   }
 
   static async createArticle(data: CreateArticleData): Promise<IArticle> {
-    return Article.create({
+    const article = await Article.create({
       title: data.title,
       body: data.body,
       tags: data.tags || [],
       status: data.status || 'draft',
       createdBy: data.createdBy
     });
+
+    // Generate embedding if article is published
+    if (article.status === 'published') {
+      this.generateEmbeddingAsync(String(article._id));
+    }
+
+    return article;
   }
 
   static async getArticle(id: string): Promise<IArticle | null> {
@@ -69,14 +78,115 @@ export class KnowledgeBaseService {
     if (Array.isArray(updates.tags)) allowed.tags = updates.tags;
     if (updates.status === 'draft' || updates.status === 'published') allowed.status = updates.status;
 
-    return Article.findByIdAndUpdate(id, allowed, { new: true, runValidators: true });
+    const oldArticle = await Article.findById(id);
+    const updatedArticle = await Article.findByIdAndUpdate(id, allowed, { new: true, runValidators: true });
+    
+    if (updatedArticle) {
+      // Handle embedding updates based on status changes
+      const wasPublished = oldArticle?.status === 'published';
+      const isNowPublished = updatedArticle.status === 'published';
+      
+      if (isNowPublished && (!wasPublished || this.hasContentChanged(oldArticle, updatedArticle))) {
+        // Generate/update embedding for newly published or modified articles
+        this.generateEmbeddingAsync(id);
+      } else if (wasPublished && !isNowPublished) {
+        // Remove embedding if article is no longer published
+        this.deleteEmbeddingAsync(id);
+      }
+    }
+
+    return updatedArticle;
   }
 
   static async deleteArticle(id: string): Promise<void> {
     await Article.findByIdAndDelete(id);
+    // Clean up associated embedding
+    this.deleteEmbeddingAsync(id);
+  }
+
+  /**
+   * RAG Management Methods
+   */
+  
+  /**
+   * Generate embeddings for all published articles
+   */
+  static async generateAllEmbeddings(): Promise<{ processed: number; errors: number }> {
+    return RAGService.generateEmbeddingsForAllArticles();
+  }
+  
+  /**
+   * Get RAG system statistics
+   */
+  static async getRAGStats() {
+    return RAGService.getEmbeddingStats();
+  }
+  
+  /**
+   * Utility Methods
+   */
+  
+  private static generateEmbeddingAsync(articleId: string): void {
+    // Generate embedding asynchronously without blocking the response
+    RAGService.generateEmbeddingForArticle(articleId)
+      .then(() => {
+        console.log(`✅ Generated embedding for article ${articleId}`);
+      })
+      .catch(error => {
+        console.error(`❌ Failed to generate embedding for article ${articleId}:`, error);
+      });
+  }
+  
+  private static deleteEmbeddingAsync(articleId: string): void {
+    // Delete embedding asynchronously
+    RAGService.deleteEmbeddingForArticle(articleId)
+      .then(() => {
+        console.log(`🗑️ Deleted embedding for article ${articleId}`);
+      })
+      .catch(error => {
+        console.error(`❌ Failed to delete embedding for article ${articleId}:`, error);
+      });
+  }
+  
+  private static hasContentChanged(oldArticle: IArticle | null, newArticle: IArticle): boolean {
+    if (!oldArticle) return true;
+    
+    return (
+      oldArticle.title !== newArticle.title ||
+      oldArticle.body !== newArticle.body ||
+      JSON.stringify(oldArticle.tags) !== JSON.stringify(newArticle.tags)
+    );
   }
 
   static async getRelevantArticles(ticketContent: string, limit: number = 3): Promise<IScoredArticle[]> {
+    const query = ticketContent.trim();
+    if (!query) return [];
+
+    try {
+      // Use RAG service for enhanced semantic search
+      const ragResult = await RAGService.retrieveRelevantContent(query, limit, true);
+      
+      console.log(`📊 RAG Search Results for query "${query.substring(0, 50)}...":`, {
+        method: ragResult.searchMethod,
+        matches: ragResult.totalMatches,
+        executionTime: ragResult.executionTimeMs + 'ms'
+      });
+      
+      if (ragResult.articles.length > 0) {
+        return ragResult.articles;
+      }
+    } catch (error) {
+      console.error('RAG search failed, falling back to traditional search:', error);
+    }
+
+    // Fallback to traditional search if RAG fails
+    return this.getFallbackRelevantArticles(query, limit);
+  }
+
+  /**
+   * Fallback method using traditional keyword search
+   */
+  private static async getFallbackRelevantArticles(ticketContent: string, limit: number = 3): Promise<IScoredArticle[]> {
     const query = ticketContent.trim();
     if (!query) return [];
 

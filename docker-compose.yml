@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # MongoDB Database
   mongodb:
     image: mongo:7.0
     container_name: smart-helpdesk-mongodb
@@ -16,7 +17,13 @@ services:
       - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - smart-helpdesk-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # Redis Cache & Job Queue
   redis:
     image: redis:7.2-alpine
     container_name: smart-helpdesk-redis
@@ -28,7 +35,30 @@ services:
       - redis_data:/data
     networks:
       - smart-helpdesk-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # BullMQ Dashboard (Job Queue Management)
+  bullmq-board:
+    image: deadly0/bull-board
+    container_name: smart-helpdesk-bullmq
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      REDIS_USE_TLS: "false"
+    depends_on:
+      - redis
+    networks:
+      - smart-helpdesk-network
+
+  # Backend API Server
   api:
     build:
       context: ./server
@@ -45,16 +75,28 @@ services:
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       JWT_EXPIRES_IN: 24h
       GEMINI_API_KEY: your-gemini-api-key
+      LLM_PROVIDER: stub
+      STUB_MODE: "true"
       EMAIL_SERVICE_URL: http://localhost:8080
       CORS_ORIGIN: http://localhost:5173
+      # Auto-seeding configuration
+      AUTO_SEED: "true"
+      SAMPLE_DATA_SIZE: 50
     depends_on:
-      - mongodb
-      - redis
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - ./server:/app
       - /app/node_modules
     networks:
       - smart-helpdesk-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     develop:
       watch:
         - action: sync
@@ -63,6 +105,7 @@ services:
         - action: rebuild
           path: ./server/package.json
 
+  # Frontend React Client
   client:
     build:
       context: ./client
@@ -75,12 +118,18 @@ services:
       VITE_API_URL: http://localhost:3000
       VITE_WS_URL: ws://localhost:3000
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     volumes:
       - ./client:/app
       - /app/node_modules
     networks:
       - smart-helpdesk-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     develop:
       watch:
         - action: sync
@@ -88,6 +137,27 @@ services:
           target: /app/src
         - action: rebuild
           path: ./client/package.json
+
+  # Database Seeder Service (runs once)
+  seeder:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: smart-helpdesk-seeder
+    environment:
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/smart_helpdesk?authSource=admin
+      SAMPLE_DATA_SIZE: 50
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./scripts:/scripts
+    networks:
+      - smart-helpdesk-network
+    command: node /scripts/seed-database.js
+    restart: "no"
+    profiles:
+      - seed
 
 volumes:
   mongodb_data:

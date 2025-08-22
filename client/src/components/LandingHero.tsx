@@ -4,19 +4,10 @@ import { Button } from './ui/button';
 import { ModernCard, GradientCard } from './ui/card';
 import { 
   Shield, 
-  MessageSquare, 
-  BookOpen, 
-  Users, 
-  TrendingUp,
   CheckCircle,
   ArrowRight,
-  Star,
-  Zap,
-  Globe,
   Edit,
-  CreditCard,
-  User,
-  FileText
+  User
 } from 'lucide-react';
 
 export const LandingHero: React.FC = () => {
