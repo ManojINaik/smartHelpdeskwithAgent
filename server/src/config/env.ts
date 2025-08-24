@@ -67,6 +67,27 @@ let envConfig: EnvConfig;
 export function validateEnv(): EnvConfig {
   try {
     envConfig = envSchema.parse(process.env);
+    
+    // Log important configuration for debugging (without sensitive info)
+    console.log('⚙️ Environment configuration validated:');
+    console.log(`- NODE_ENV: ${envConfig.NODE_ENV}`);
+    console.log(`- PORT: ${envConfig.PORT}`);
+    console.log(`- LLM_PROVIDER: ${envConfig.LLM_PROVIDER}`);
+    console.log(`- STUB_MODE: ${envConfig.STUB_MODE}`);
+    console.log(`- AUTO_SEED: ${envConfig.AUTO_SEED}`);
+    
+    // Validate MongoDB URI format without logging the actual URI
+    if (envConfig.MONGODB_URI) {
+      const isAtlas = envConfig.MONGODB_URI.includes('mongodb+srv');
+      const hasDatabase = envConfig.MONGODB_URI.split('/').length > 3;
+      console.log(`- MongoDB: ${isAtlas ? 'Atlas (SRV)' : 'Standard'} connection`);
+      console.log(`- Database name: ${hasDatabase ? 'Specified' : 'Missing - this may cause issues'}`);
+      
+      if (!hasDatabase) {
+        console.warn('⚠️  Warning: MongoDB URI may be missing database name');
+      }
+    }
+    
     return envConfig;
   } catch (error) {
     console.error('❌ Invalid environment configuration:');

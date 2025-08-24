@@ -43,15 +43,32 @@ class DatabaseConnection {
     try {
       console.log(`🔄 Attempting to connect to MongoDB (attempt ${this.retryCount + 1}/${this.maxRetries})`);
       
-      await mongoose.connect(uri, {
+      // Enhanced connection options for cloud deployment
+      const connectionOptions = {
         serverSelectionTimeoutMS: this.timeout,
         socketTimeoutMS: this.timeout,
+        connectTimeoutMS: this.timeout,
         family: 4, // Use IPv4, skip trying IPv6
         maxPoolSize: 10,
-        minPoolSize: 5,
+        minPoolSize: 2, // Reduced for cloud deployment
         maxIdleTimeMS: 30000,
         bufferCommands: false,
-      });
+        // Additional options for Atlas connection
+        retryWrites: true,
+        w: 'majority',
+        // Help with connection stability in cloud environments
+        heartbeatFrequencyMS: 10000,
+        serverSelectionRetryDelayMS: 2000,
+      };
+      
+      // Add authentication source for Atlas if not specified
+      if (uri.includes('mongodb+srv') && !uri.includes('authSource')) {
+        const separator = uri.includes('?') ? '&' : '?';
+        uri = `${uri}${separator}authSource=admin`;
+      }
+      
+      console.log('🔗 Connecting with enhanced Atlas configuration...');
+      await mongoose.connect(uri, connectionOptions);
 
       this.isConnected = true;
       this.retryCount = 0;
@@ -63,18 +80,36 @@ class DatabaseConnection {
     } catch (error) {
       console.error(`❌ MongoDB connection failed:`, error);
       
+      // Log specific error details for debugging
+      if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        if ('code' in error) {
+          console.error('Error code:', error.code);
+        }
+      }
+      
       if (this.retryCount < this.maxRetries) {
         this.retryCount++;
         console.log(`⏳ Retrying connection in ${this.retryDelay / 1000} seconds...`);
         
         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
         
-        // Exponential backoff
-        this.retryDelay = Math.min(this.retryDelay * 1.5, 30000);
+        // Exponential backoff with jitter to avoid thundering herd
+        const jitter = Math.random() * 1000; // Add up to 1 second random delay
+        this.retryDelay = Math.min(this.retryDelay * 1.5 + jitter, 30000);
         
         return this.connectWithRetry(uri);
       } else {
         console.error('💥 Max retry attempts reached. Could not connect to MongoDB');
+        
+        // Log helpful debugging information
+        console.error('🔍 Debugging information:');
+        console.error('- Check MongoDB Atlas IP whitelist (allow 0.0.0.0/0)');
+        console.error('- Verify database user permissions (readWrite)');
+        console.error('- Confirm connection string format');
+        console.error('- Check if cluster is paused in Atlas');
+        
         throw new Error('Database connection failed after maximum retry attempts');
       }
     }
